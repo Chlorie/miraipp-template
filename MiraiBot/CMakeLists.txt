@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
-add_executable(main "main.cpp" "mirai/session.cpp" "mirai/utils.cpp" "mirai/common.cpp" "mirai/message.cpp")
+add_executable(main "main.cpp" "mirai/session.cpp" "mirai/utils.cpp" "mirai/common.cpp" "mirai/message.cpp" "mirai/events.cpp" "mirai/types.cpp")
 set_target_properties(main PROPERTIES
     CXX_STANDARD 17)
 

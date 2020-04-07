@@ -3,6 +3,8 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 
+namespace cpr { class Parameters; }
+
 // For serializing standard library types
 namespace nlohmann
 {
@@ -35,8 +37,34 @@ namespace mirai::utils
      * \brief Overload utility class to overload multiple functors
      * \tparam F Types of the functors
      */
-    template <typename... F> struct Overload { using F::operator()...; };
+    template <typename... F> struct Overload : F... { using F::operator()...; };
     template <typename... F> Overload(F...)->Overload<F...>;
+
+    /**
+     * \brief Provide a fallback function object for an overload,
+     * usually used to ignore some cases when visiting a variant
+     * \tparam T Type of the default return value
+     * \param value The default return value
+     * \return A lambda taking in anything, returning the given value
+     */
+    template <typename T>
+    auto fallback(T&& value)
+    {
+        return[v = std::forward<T>(value)](...)->T
+        {
+            return std::forward<T>(v);
+        };
+    }
+
+    /**
+     * \brief Provide a fallback function object for an overload,
+     * usually used to ignore some cases when visiting a variant
+     * \return A lambda taking in anything, returning void
+     */
+    inline auto fallback() { return [](...) {}; }
+
+    std::string get_no_parse(std::string_view url, const cpr::Parameters& parameters);
+    json get(std::string_view url, const cpr::Parameters& parameters);
 
     std::string post_json_no_parse(std::string_view url, const json& json);
     json post_json(std::string_view url, const json& json);

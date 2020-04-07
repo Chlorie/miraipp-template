@@ -11,8 +11,10 @@ int main()
     try
     {
         const mirai::Session sess(auth_key, qq);
-        const int32_t msgid = sess.send_group_message(dnd, mirai::plain_text("Hello"));
-        sess.send_group_message(dnd, mirai::plain_text("World"), msgid);
+        std::string result;
+        for (const auto& group : sess.group_list())
+            result += std::to_string(group.id) + ": " + group.name + '\n';
+        sess.send_friend_message(dev, result);
     }
     catch (const mirai::RuntimeError& e)
     {

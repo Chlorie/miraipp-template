@@ -2,25 +2,6 @@
 
 namespace mirai
 {
-    namespace
-    {
-        constexpr std::array<std::string_view, std::variant_size_v<msg::Variant>> msg_types
-        {
-            "Source", "Quote", "At", "AtAll", "Face", "Plain",
-            "Image", "FlashImage", "Xml", "Json", "App", "Poke"
-        };
-
-        template <size_t... I>
-        void node_from_json_impl(const utils::json& json, MessageChainNode& value,
-            std::index_sequence<I...>)
-        {
-            const std::string& type = json["type"].get_ref<const std::string&>();
-            ((type == msg_types[I]
-                ? value = json.get<std::variant_alternative_t<I, msg::Variant>>()
-                : (void)0), ...);
-        }
-    }
-
     namespace msg
     {
         void to_json(utils::json& json, const Source& value)
@@ -199,6 +180,25 @@ namespace mirai
     }
 
     Message plain_text(const std::string_view text) { return { { msg::Plain{ std::string(text) } } }; }
+    
+    namespace
+    {
+        constexpr std::array<std::string_view, std::variant_size_v<msg::Variant>> msg_types
+        {
+            "Source", "Quote", "At", "AtAll", "Face", "Plain",
+            "Image", "FlashImage", "Xml", "Json", "App", "Poke"
+        };
+
+        template <size_t... I>
+        void node_from_json_impl(const utils::json& json, MessageChainNode& value,
+            std::index_sequence<I...>)
+        {
+            const std::string& type = json["type"].get_ref<const std::string&>();
+            ((type == msg_types[I]
+                ? value = json.get<std::variant_alternative_t<I, msg::Variant>>()
+                : (void)0), ...);
+        }
+    }
 
     void to_json(utils::json& json, const MessageChainNode& value)
     {

@@ -2,12 +2,19 @@
 
 #include <vector>
 #include <string>
-#include <variant>
+#include "variant_wrapper.h"
 #include "utils.h"
 
 namespace mirai
 {
+    /**
+     * \brief Type representing a single node in the message chain
+     */
     class MessageChainNode;
+
+    /**
+     * \brief A chain of message chain nodes, being the whole message
+     */
     using Message = std::vector<MessageChainNode>;
 
     namespace msg
@@ -91,52 +98,20 @@ namespace mirai
             Image, FlashImage, Xml, Json, App, Poke>;
     }
 
-    class MessageChainNode final
+    enum class MessageChainNodeType
+    {
+        source, quote, at, at_all, face, plain,
+        image, flash_image, xml, json, app, poke
+    };
+
+    class MessageChainNode final : // Forward declaring type alias is impossible, using inheritance here
+        public VariantWrapper<msg::Variant, MessageChainNodeType>
     {
     private:
-        msg::Variant data_;
-    public:
-        enum class Type
-        {
-            source, quote, at, at_all, face, plain,
-            image, flash_image, xml, json, app, poke
-        };
-        template <typename F, typename D>
-        using enable_if_visitable_t = std::void_t<decltype(std::visit(std::declval<F&&>(), std::declval<D>()))>;
-    public:
-        MessageChainNode() = default;
-        MessageChainNode(const msg::Variant& variant) :data_(variant) {}
-        MessageChainNode(msg::Variant&& variant) :data_(std::move(variant)) {}
-        MessageChainNode& operator=(const msg::Variant& variant)
-        {
-            data_ = variant;
-            return *this;
-        }
-        MessageChainNode& operator=(msg::Variant&& variant)
-        {
-            data_ = std::move(variant);
-            return *this;
-        }
-
-        Type type() const { return Type(data_.index()); }
-        template <Type T> auto& get() { return std::get<size_t(T)>(data_); }
-        template <Type T> const auto& get() const { return std::get<size_t(T)>(data_); }
-        template <typename T> T& get() { return std::get<T>(data_); }
-        template <typename T> const T& get() const { return std::get<T>(data_); }
-
-        msg::Variant& data() { return data_; }
-        const msg::Variant& data() const { return data_; }
-
-        template <typename F, typename = enable_if_visitable_t<F, msg::Variant&>>
-        decltype(auto) apply(F&& func)
-        {
-            return std::visit(std::forward<F>(func), data_);
-        }
-        template <typename F, typename = enable_if_visitable_t<F, const msg::Variant&>>
-        decltype(auto) apply(F&& func) const
-        {
-            return std::visit(std::forward<F>(func), data_);
-        }
+        using Base = VariantWrapper<msg::Variant, MessageChainNodeType>;
+    public: // Expose special members from the base class
+        using Base::Base;
+        using Base::operator=;
     };
 
     /**
