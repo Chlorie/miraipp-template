@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <string>
-#include "variant_wrapper.h"
-#include "utils.h"
+#include "../utils/json_extensions.h"
+#include "../utils/variant_wrapper.h"
 
 namespace mirai
 {
@@ -17,7 +17,7 @@ namespace mirai
      */
     using Message = std::vector<MessageChainNode>;
 
-    namespace msg
+    namespace msg // TODO: needs documentation
     {
         struct Source final
         {
@@ -98,6 +98,9 @@ namespace mirai
             Image, FlashImage, Xml, Json, App, Poke>;
     }
 
+    /**
+     * \brief Enum corresponding to every type of a message chain node
+     */
     enum class MessageChainNodeType
     {
         source, quote, at, at_all, face, plain,
@@ -105,7 +108,7 @@ namespace mirai
     };
 
     class MessageChainNode final : // Forward declaring type alias is impossible, using inheritance here
-        public VariantWrapper<msg::Variant, MessageChainNodeType>
+        public utils::VariantWrapper<msg::Variant, MessageChainNodeType>
     {
     private:
         using Base = VariantWrapper<msg::Variant, MessageChainNodeType>;

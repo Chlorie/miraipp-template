@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utils.h"
+#include "../utils/json_extensions.h"
 
-namespace mirai
+namespace mirai // TODO: needs documentation
 {
     enum class TargetType : bool { friend_, group };
 

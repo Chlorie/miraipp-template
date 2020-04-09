@@ -1,22 +1,11 @@
 #include "session.h"
 #include <cpr/cpr.h>
 #include "common.h"
-#include "utils.h"
+#include "../utils/request.h"
 
 namespace mirai
 {
-    void Session::release() const noexcept
-    {
-        if (qq_ == 0) return; // Moved-from or default init
-        try
-        {
-            utils::post_json("/release", {
-                    { "sessionKey", key_ },
-                    { "qq", qq_ }
-                });
-        }
-        catch (...) { std::abort(); }
-    }
+    using namespace utils;
 
     Session::Session(const std::string_view auth_key, const int64_t qq)
     {
@@ -39,7 +28,18 @@ namespace mirai
         }
     }
 
-    Session::~Session() noexcept { release(); }
+    Session::~Session() noexcept
+    {
+        if (qq_ == 0) return; // Invalid session
+        try
+        {
+            utils::post_json("/release", {
+                    { "sessionKey", key_ },
+                    { "qq", qq_ }
+                });
+        }
+        catch (...) { std::abort(); }
+    }
 
     Session::Session(Session&& other) noexcept :
         qq_(std::exchange(other.qq_, 0)),
@@ -47,10 +47,15 @@ namespace mirai
 
     Session& Session::operator=(Session&& other) noexcept
     {
-        release();
-        qq_ = std::exchange(other.qq_, 0);
-        key_ = std::move(other.key_);
+        Session copy(std::move(other));
+        swap(copy);
         return *this;
+    }
+
+    void Session::swap(Session& other) noexcept
+    {
+        std::swap(qq_, other.qq_);
+        std::swap(key_, other.key_);
     }
 
     int32_t Session::send_friend_message(const int64_t target,

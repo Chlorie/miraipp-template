@@ -1,5 +1,4 @@
 #pragma once
 
-#include "common.h"
-#include "session.h"
-#include "message.h"
+#include "core/common.h"
+#include "core/session.h"

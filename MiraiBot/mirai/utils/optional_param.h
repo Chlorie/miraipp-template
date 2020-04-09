@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace mirai
+namespace mirai::utils
 {
     /**
      * \brief Optional parameter type which wraps a pointer

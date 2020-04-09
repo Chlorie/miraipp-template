@@ -3,15 +3,16 @@
 #include <optional>
 #include <variant>
 #include "types.h"
-#include "variant_wrapper.h"
 #include "message.h"
+#include "../utils/variant_wrapper.h"
+#include "../utils/json_extensions.h"
 
-namespace mirai
+namespace mirai // TODO: needs documentation
 {
     struct GroupMessage final
     {
-        Message message;
-        Member sender;
+        Message message; ///< The message
+        Member sender; ///< Sender of the message
     };
 
     struct FriendMessage final
@@ -209,7 +210,7 @@ namespace mirai
      * \brief The event type containing every kind of event,
      * plus the two message receiving "events"
      */
-    using Event = VariantWrapper<EventVariant, EventType>;
+    using Event = utils::VariantWrapper<EventVariant, EventType>;
 
     void from_json(const utils::json& json, Event& value);
 }

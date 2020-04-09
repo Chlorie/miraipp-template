@@ -1,5 +1,6 @@
 #include <iostream>
 #include "mirai/mirai.h"
+#include "mirai/utils/encoding.h"
 
 int main()
 {

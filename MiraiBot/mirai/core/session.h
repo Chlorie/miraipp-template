@@ -2,10 +2,10 @@
 
 #include <string>
 #include "message.h"
-#include "optional_param.h"
-#include "array_proxy.h"
 #include "types.h"
 #include "events.h"
+#include "../utils/optional_param.h"
+#include "../utils/array_proxy.h"
 
 namespace mirai
 {
@@ -20,7 +20,6 @@ namespace mirai
     private:
         int64_t qq_ = 0;
         std::string key_;
-        void release() const noexcept;
     public:
         /**
          * \brief Construct a default invalid Session object
@@ -34,11 +33,46 @@ namespace mirai
          */
         Session(std::string_view auth_key, int64_t qq);
 
+        /**
+         * \brief Free the resource of a session
+         */
         ~Session() noexcept;
+
+        /**
+         * \brief Sessions cannot be duplicated
+         */
         Session(const Session&) = delete;
+
+        /**
+         * \brief Take the ownership of a session from another object
+         * \param other The other object
+         */
         Session(Session&& other) noexcept;
+
+        /**
+         * \brief Sessions cannot be duplicated
+         */
         Session& operator=(const Session&) = delete;
+
+        /**
+         * \brief Take the ownership of a session from another object
+         * \param other The other object
+         * \return Reference to this object
+         */
         Session& operator=(Session&& other) noexcept;
+
+        /**
+         * \brief Swap this session object with another
+         * \param other The other object
+         */
+        void swap(Session& other) noexcept;
+
+        /**
+         * \brief Swap two session objects
+         * \param lhs The first object
+         * \param rhs The second object
+         */
+        friend void swap(Session& lhs, Session& rhs) noexcept { lhs.swap(rhs); }
 
         /**
          * \brief Check whether the session object is valid <br>
@@ -67,7 +101,7 @@ namespace mirai
          * \return The message ID of the message sent
          */
         int32_t send_friend_message(int64_t target, const Message& msg,
-            OptionalParam<int32_t> quote = {}) const;
+            utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
          * \brief Send plain text message to a friend
@@ -77,7 +111,7 @@ namespace mirai
          * \return The message ID of the message sent
          */
         int32_t send_friend_message(int64_t target, std::string_view msg,
-            OptionalParam<int32_t> quote = {}) const;
+            utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
          * \brief Send message to a group
@@ -87,7 +121,7 @@ namespace mirai
          * \return The message ID of the message sent
          */
         int32_t send_group_message(int64_t target, const Message& msg,
-            OptionalParam<int32_t> quote = {}) const;
+            utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
          * \brief Send plain text message to a group
@@ -97,7 +131,7 @@ namespace mirai
          * \return The message ID of the message sent
          */
         int32_t send_group_message(int64_t target, std::string_view msg,
-            OptionalParam<int32_t> quote = {}) const;
+            utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
          * \brief Send images via URLs
@@ -109,7 +143,7 @@ namespace mirai
          * need to retrieve image ID from URLs
          */
         std::vector<std::string> send_image_message(int64_t target, TargetType type,
-            ArrayProxy<std::string> urls) const;
+            utils::ArrayProxy<std::string> urls) const;
 
         /**
          * \brief Send images to a friend via URLs
@@ -120,7 +154,7 @@ namespace mirai
          * need to retrieve image ID from URLs
          */
         std::vector<std::string> send_friend_image_message(int64_t target,
-            ArrayProxy<std::string> urls) const;
+            utils::ArrayProxy<std::string> urls) const;
 
         /**
          * \brief Send images to a group via URLs
@@ -131,7 +165,7 @@ namespace mirai
          * need to retrieve image ID from URLs
          */
         std::vector<std::string> send_group_image_message(int64_t target,
-            ArrayProxy<std::string> urls) const;
+            utils::ArrayProxy<std::string> urls) const;
 
         /**
          * \brief Upload an image to the server

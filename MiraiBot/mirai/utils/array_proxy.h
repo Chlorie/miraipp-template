@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-namespace mirai
+namespace mirai::utils
 {
     /**
      * \brief A non-owning view to a contiguous range of elements, use std::span when C++20 comes out
