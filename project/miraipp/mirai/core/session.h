@@ -4,8 +4,13 @@
 #include "message.h"
 #include "types.h"
 #include "events.h"
+#include "common.h"
 #include "../utils/optional_param.h"
 #include "../utils/array_proxy.h"
+#include "../utils/functional.h"
+#include "../utils/request.h"
+#include "../utils/string.h"
+#include "../websockets/client.h"
 
 namespace mirai
 {
@@ -20,6 +25,12 @@ namespace mirai
     private:
         int64_t qq_ = 0;
         std::string key_;
+        std::unique_ptr<ws::Client> client_;
+
+        template <typename F, typename E>
+        ws::Connection& subscribe(std::string_view url,
+            F&& callback, E&& error_handler);
+
     public:
         /**
          * \brief Construct a default invalid Session object
@@ -92,6 +103,12 @@ namespace mirai
          * \return The key
          */
         std::string_view key() const { return key_; }
+
+        /**
+         * \brief Query whether the websocket client is started
+         * \return The result
+         */
+        bool websocket_client_started() const { return client_ != nullptr; }
 
         /**
          * \brief Send message to a friend
@@ -180,6 +197,7 @@ namespace mirai
         /**
          * \brief Recall a message
          * \param message_id The ID of the message to recall
+         * \remarks As for now (mirai core 0.35), recalling friend messages are not supported
          */
         void recall(int32_t message_id) const; // TODO: return whether the operation is success
 
@@ -284,6 +302,49 @@ namespace mirai
         MemberInfo member_info(int64_t group, int64_t member) const;
 
         /**
+         * \brief Start the websocket client
+         */
+        void start_websocket_client();
+
+        /**
+         * \brief Close the websocket client, outstanding connections will
+         * also be closed
+         */
+        void close_websocket_client();
+
+        /**
+         * \brief Listen on message events received using the callback
+         * \tparam F Type of the callback
+         * \tparam E Type of the error handler
+         * \param callback The callback
+         * \param error_handler The error handler
+         * \returns The Websocket connection
+         * \remarks The callback should be able to visit variants with
+         * all the event types, the error handler should be able
+         * to handle mirai::RuntimeError exceptions. The events will be
+         * handled on another thread, so if any exception is not handled
+         * the application will abort.
+         */
+        template <typename F, typename E>
+        ws::Connection& subscribe_messages(F&& callback, E&& error_handler = error_rethrower);
+
+        /**
+         * \brief Listen on all events received using the callback
+         * \tparam F Type of the callback
+         * \tparam E Type of the error handler
+         * \param callback The callback
+         * \param error_handler The error handler
+         * \returns The Websocket connection
+         * \remarks The callback should be able to visit variants with
+         * all the event types, the error handler should be able
+         * to handle mirai::RuntimeError exceptions. The events will be
+         * handled on another thread, so if any exception is not handled
+         * the application will abort.
+         */
+        template <typename F, typename E>
+        ws::Connection& subscribe_all_events(F&& callback, E&& error_handler = error_rethrower);
+
+        /**
          * \brief Set the config of this session
          * \param config The config to set to
          */
@@ -295,4 +356,40 @@ namespace mirai
          */
         SessionConfig config() const;
     };
+
+    template <typename F, typename E>
+    ws::Connection& Session::subscribe(const std::string_view url,
+        F&& callback, E&& error_handler)
+    {
+        if (!client_) throw RuntimeError("Websocket client isn't started");
+        const std::string uri = utils::strcat("ws://", base_url, url, "?sessionKey=", key_);
+        ws::Connection& con = client_->connect(uri);
+        con.message_callback([callback = std::forward<F>(callback),
+            error_handler = std::forward<E>(error_handler)](const std::string& msg)
+        {
+            try
+            {
+                const utils::json json = utils::json::parse(msg);
+                utils::check_response(json);
+                Event e = json.get<Event>();
+                callback(e);
+            }
+            catch (const RuntimeError& e) { error_handler(e); }
+        });
+        return con;
+    }
+
+    template <typename F, typename E>
+    ws::Connection& Session::subscribe_messages(F&& callback, E&& error_handler)
+    {
+        return subscribe("/message",
+            std::forward<F>(callback), std::forward<E>(error_handler));
+    }
+
+    template <typename F, typename E>
+    ws::Connection& Session::subscribe_all_events(F&& callback, E&& error_handler)
+    {
+        return subscribe("/all",
+            std::forward<F>(callback), std::forward<E>(error_handler));
+    }
 }

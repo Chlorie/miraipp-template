@@ -26,4 +26,4 @@ namespace nlohmann
     };
 }
 
-namespace mirai::utils { using nlohmann::json; }
+namespace mirai::utils { using json = nlohmann::json; }

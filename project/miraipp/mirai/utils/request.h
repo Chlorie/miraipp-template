@@ -6,7 +6,7 @@ namespace cpr { class Parameters; }
 
 namespace mirai::utils
 {
-    using nlohmann::json;
+    using json = nlohmann::json;
 
     /**
      * \brief GET request, throw if status code is not 200 (OK)

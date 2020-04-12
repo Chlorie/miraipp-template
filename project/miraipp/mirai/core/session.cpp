@@ -1,12 +1,9 @@
 #include "session.h"
 #include <cpr/cpr.h>
 #include "common.h"
-#include "../utils/request.h"
 
 namespace mirai
 {
-    using namespace utils;
-
     Session::Session(const std::string_view auth_key, const int64_t qq)
     {
         // Authorize
@@ -43,7 +40,8 @@ namespace mirai
 
     Session::Session(Session&& other) noexcept :
         qq_(std::exchange(other.qq_, 0)),
-        key_(std::move(other.key_)) {}
+        key_(std::move(other.key_)),
+        client_(std::move(other.client_)) {}
 
     Session& Session::operator=(Session&& other) noexcept
     {
@@ -56,10 +54,11 @@ namespace mirai
     {
         std::swap(qq_, other.qq_);
         std::swap(key_, other.key_);
+        std::swap(client_, other.client_);
     }
 
     int32_t Session::send_friend_message(const int64_t target,
-        const Message& msg, const OptionalParam<int32_t> quote) const
+        const Message& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },
@@ -73,13 +72,13 @@ namespace mirai
     }
 
     int32_t Session::send_friend_message(const int64_t target,
-        const std::string_view msg, const OptionalParam<int32_t> quote) const
+        const std::string_view msg, const utils::OptionalParam<int32_t> quote) const
     {
         return send_friend_message(target, plain_text(msg), quote);
     }
 
     int32_t Session::send_group_message(const int64_t target,
-        const Message& msg, const OptionalParam<int32_t> quote) const
+        const Message& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },
@@ -93,13 +92,13 @@ namespace mirai
     }
 
     int32_t Session::send_group_message(const int64_t target,
-        const std::string_view msg, const OptionalParam<int32_t> quote) const
+        const std::string_view msg, const utils::OptionalParam<int32_t> quote) const
     {
         return send_group_message(target, plain_text(msg), quote);
     }
 
     std::vector<std::string> Session::send_image_message(
-        const int64_t target, const TargetType type, const ArrayProxy<std::string> urls) const
+        const int64_t target, const TargetType type, const utils::ArrayProxy<std::string> urls) const
     {
         const utils::json json{
             { "sessionKey", key_ },
@@ -112,13 +111,13 @@ namespace mirai
     }
 
     std::vector<std::string> Session::send_friend_image_message(
-        const int64_t target, const ArrayProxy<std::string> urls) const
+        const int64_t target, const utils::ArrayProxy<std::string> urls) const
     {
         return send_image_message(target, TargetType::friend_, urls);
     }
 
     std::vector<std::string> Session::send_group_image_message(
-        const int64_t target, const ArrayProxy<std::string> urls) const
+        const int64_t target, const utils::ArrayProxy<std::string> urls) const
     {
         return send_image_message(target, TargetType::group, urls);
     }
@@ -284,11 +283,24 @@ namespace mirai
         return res.get<MemberInfo>();
     }
 
+    void Session::start_websocket_client()
+    {
+        if (!websocket_client_started())
+            client_ = std::make_unique<ws::Client>();
+    }
+
+    void Session::close_websocket_client()
+    {
+        if (websocket_client_started())
+            client_.reset();
+    }
+
     void Session::config(const SessionConfig& config) const
     {
         (void)utils::post_json_no_parse("/config", {
                 { "sessionKey", key_ },
-                { "config", config }
+                { "cacheSize", config.cache_size },
+                { "enableWebsocket", config.enable_websocket }
             });
     }
 

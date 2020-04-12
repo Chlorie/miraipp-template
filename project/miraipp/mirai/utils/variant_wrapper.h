@@ -1,9 +1,28 @@
 #pragma once
 
 #include <variant>
+#include "meta.h"
 
 namespace mirai::utils
 {
+    /**
+     * \brief Provide static member for whether a callable is suitable
+     * for visiting a specific variant type
+     * \tparam F Type of the callable object
+     * \tparam V Type of the variant
+     */
+    template <typename F, typename V> struct is_variant_visitable : std::false_type {};
+    template <typename F, typename... Ts> struct is_variant_visitable<F, std::variant<Ts...>> :
+        std::bool_constant<is_visitable_v<F, Ts...>> {};
+
+    /**
+     * \brief Check whether a callable is suitable for visiting a specific variant type
+     * \tparam F Type of the callable object
+     * \tparam V Type of the variant
+     */
+    template <typename F, typename V>
+    constexpr bool is_variant_visitable_v = is_variant_visitable<F, V>::value;
+
     /**
      * \brief A wrapper for easier access of std::variant, providing member functions
      * for query the type index and visiting the variant
@@ -15,8 +34,7 @@ namespace mirai::utils
     {
     private:
         template <typename F, typename D>
-        using enable_if_visitable_t = std::void_t<decltype(std::visit(
-            std::declval<F&&>(), std::declval<D>()))>;
+        using visit_result_t = decltype((std::visit(std::declval<F&&>(), std::declval<D>())));
 
         VariantType data_;
     public:
@@ -32,20 +50,20 @@ namespace mirai::utils
          * \brief Copy a variant
          * \param variant The other variant
          */
-        VariantWrapper(const VariantType& variant) :data_(variant) {}
-        
+        VariantWrapper(const Variant& variant) :data_(variant) {}
+
         /**
          * \brief Move a variant
          * \param variant The other variant
          */
-        VariantWrapper(VariantType&& variant) :data_(std::move(variant)) {}
-        
+        VariantWrapper(Variant&& variant) :data_(std::move(variant)) {}
+
         /**
          * \brief Copy a variant
          * \param variant The other variant
          * \returns Reference to this object
          */
-        VariantWrapper& operator=(const VariantType& variant)
+        VariantWrapper& operator=(const Variant& variant)
         {
             data_ = variant;
             return *this;
@@ -56,7 +74,7 @@ namespace mirai::utils
          * \param variant The other variant
          * \returns Reference to this object
          */
-        VariantWrapper& operator=(VariantType&& variant)
+        VariantWrapper& operator=(Variant&& variant)
         {
             data_ = std::move(variant);
             return *this;
@@ -132,13 +150,13 @@ namespace mirai::utils
          * \brief Get a reference of the underlying variant data
          * \return The result
          */
-        VariantType& data() { return data_; }
+        Variant& data() { return data_; }
 
         /**
          * \brief Get a const reference of the underlying variant data
          * \return The result
          */
-        const VariantType& data() const { return data_; }
+        const Variant& data() const { return data_; }
 
         /**
          * \brief Apply a callable object to the variant (calling std::visit)
@@ -146,19 +164,19 @@ namespace mirai::utils
          * \param func The callable object
          * \return The result
          */
-        template <typename F, typename = enable_if_visitable_t<F, VariantType&>>
+        template <typename F, typename = visit_result_t<F, Variant&>>
         decltype(auto) apply(F&& func)
         {
             return std::visit(std::forward<F>(func), data_);
         }
-        
+
         /**
          * \brief Apply a callable object to the variant (calling std::visit)
          * \tparam F Type of the callable object
          * \param func The callable object
          * \return The result
          */
-        template <typename F, typename = enable_if_visitable_t<F, const VariantType&>>
+        template <typename F, typename = visit_result_t<F, const Variant&>>
         decltype(auto) apply(F&& func) const
         {
             return std::visit(std::forward<F>(func), data_);

@@ -1,20 +1,22 @@
-﻿cmake_minimum_required(VERSION 3.10)
+﻿# Mirai++ API Library
 
 set(SOURCE_FILES
-    "main.cpp"
-    "mirai/core/session.cpp"   
+    "mirai/core/session.cpp" "mirai/core/common.cpp"
     "mirai/core/message.cpp" "mirai/core/events.cpp" "mirai/core/types.cpp"
-    "mirai/utils/thread.cpp" "mirai/utils/encoding.cpp" "mirai/utils/request.cpp")
+    "mirai/utils/thread.cpp" "mirai/utils/encoding.cpp" "mirai/utils/request.cpp" 
+    "mirai/websockets/client.cpp" "mirai/websockets/connection.cpp")
 
-add_executable(main ${SOURCE_FILES})
+add_library(miraipp ${SOURCE_FILES})
+target_include_directories(miraipp INTERFACE ./)
 
-target_compile_features(main PUBLIC cxx_std_17) # Enforce C++17
-set_target_properties(main PROPERTIES CXX_EXTENSIONS off)
+target_compile_features(miraipp PUBLIC cxx_std_17) # Enforce C++17 or newer
+set_target_properties(miraipp PROPERTIES CXX_EXTENSIONS off)
+target_compile_definitions(miraipp PUBLIC ASIO_STANDALONE)
 
 # /Zc:__cplusplus is needed for MSVC to produce correct value for the __cplusplus macro
 # If this option is not on, __cplusplus will always expands to 199711L
 if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
-    target_compile_options(main PUBLIC "/Zc:__cplusplus")
+    target_compile_options(miraipp PUBLIC "/Zc:__cplusplus")
 endif()
 
 find_package(cpr CONFIG REQUIRED)
@@ -23,7 +25,7 @@ find_package(OpenSSL REQUIRED)
 find_package(asio CONFIG REQUIRED)
 find_package(unofficial-iconv CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-target_link_libraries(main PRIVATE 
+target_link_libraries(miraipp PUBLIC 
     cpr 
     websocketpp::websocketpp 
     OpenSSL::SSL OpenSSL::Crypto

@@ -21,7 +21,7 @@ namespace mirai::utils
     std::string post_json_no_parse(const std::string_view url, const json& json)
     {
         const cpr::Response response = Post(cpr::Url{ std::string(base_url) += url },
-            cpr::Header{ { "Content-Type", "application/json" } },
+            cpr::Header{ { "Content-Type", "application/json; charset=utf-8" } },
             cpr::Body{ json.dump() });
         if (response.status_code != 200) // Status code not OK
             throw RuntimeError(response.error.message);

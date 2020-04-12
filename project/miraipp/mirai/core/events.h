@@ -182,16 +182,19 @@ namespace mirai // TODO: needs documentation
     void from_json(const utils::json& json, MemberMuteEvent& value);
     void from_json(const utils::json& json, MemberUnmuteEvent& value);
 
-    using EventVariant = std::variant<
-        GroupMessage, FriendMessage,
+    using MessageEventVariant = std::variant<GroupMessage, FriendMessage>;
+    using NonMessageEventVariant = std::variant<
         BotOnlineEvent, BotOfflineEventActive, BotOfflineEventForce, BotOfflineEventDropped,
         BotReloginEvent, GroupRecallEvent, FriendRecallEvent, BotGroupPermissionChangeEvent,
         BotMuteEvent, BotUnmuteEvent, BotJoinGroupEvent, GroupNameChangeEvent,
         GroupEntranceAnnouncementChangeEvent, GroupMuteAllEvent, GroupAllowAnonymousChatEvent,
         GroupAllowConfessTalkEvent, GroupAllowMemberInviteEvent, MemberJoinEvent,
-        MemberLeaveEventKick, MemberLeaveEventQuit, MemberCardChangeEvent, MemberSpecialTitleChangeEvent,
-        MemberPermissionChangeEvent, MemberMuteEvent, MemberUnmuteEvent
+        MemberLeaveEventKick, MemberLeaveEventQuit, MemberCardChangeEvent,
+        MemberSpecialTitleChangeEvent, MemberPermissionChangeEvent, MemberMuteEvent, MemberUnmuteEvent
     >;
+
+    using EventVariant = utils::apply_template_t<std::variant, utils::concat_list_t<
+        utils::extract_types_t<MessageEventVariant>, utils::extract_types_t<NonMessageEventVariant>>>;
 
     enum class EventType
     {
