@@ -199,7 +199,7 @@ namespace mirai
          * \param message_id The ID of the message to recall
          * \remarks As for now (mirai core 0.35), recalling friend messages are not supported
          */
-        void recall(int32_t message_id) const; // TODO: return whether the operation is success
+        void recall(int32_t message_id) const; // TODO: maybe return whether the operation is success
 
         /**
          * \brief Fetch an amount of events
@@ -276,7 +276,7 @@ namespace mirai
          * \param target The group ID
          * \param config The config to set
          */
-        void group_config(int64_t target, const GroupConfig& config) const; // TODO: fields should be optional
+        void group_config(int64_t target, const GroupConfig& config) const; // TODO: optional fields
 
         /**
          * \brief Get a group's config
@@ -291,7 +291,7 @@ namespace mirai
          * \param member The member ID
          * \param info The member info to modify to
          */
-        void member_info(int64_t group, int64_t member, const MemberInfo& info) const;
+        void member_info(int64_t group, int64_t member, const MemberInfo& info) const; // TODO: optional fields
 
         /**
          * \brief Get a group member's info
@@ -320,7 +320,7 @@ namespace mirai
          * \param error_handler The error handler
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
-         * all the event types, the error handler should be able
+         * both of the message types. The error handler should be able
          * to handle mirai::RuntimeError exceptions. The events will be
          * handled on another thread, so if any exception is not handled
          * the application will abort.
@@ -331,6 +331,24 @@ namespace mirai
         ws::Connection& subscribe_messages(F&& callback, E&& error_handler = error_rethrower);
 
         /**
+         * \brief Listen on non-message events received using the callback
+         * \tparam F Type of the callback
+         * \tparam E Type of the error handler
+         * \param callback The callback
+         * \param error_handler The error handler
+         * \returns The Websocket connection
+         * \remarks The callback should be able to visit variants with
+         * all of the non-message event types. The error handler should be able
+         * to handle mirai::RuntimeError exceptions. The events will be
+         * handled on another thread, so if any exception is not handled
+         * the application will abort.
+         */
+        template <typename F, typename E,
+            typename = std::invoke_result_t<F, Event&>,
+            typename = std::invoke_result_t<E, const RuntimeError&>>
+        ws::Connection& subscribe_non_message(F&& callback, E&& error_handler = error_rethrower);
+
+        /**
          * \brief Listen on all events received using the callback
          * \tparam F Type of the callback
          * \tparam E Type of the error handler
@@ -338,7 +356,7 @@ namespace mirai
          * \param error_handler The error handler
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
-         * all the event types, the error handler should be able
+         * all of the event types. The error handler should be able
          * to handle mirai::RuntimeError exceptions. The events will be
          * handled on another thread, so if any exception is not handled
          * the application will abort.
@@ -349,10 +367,13 @@ namespace mirai
         ws::Connection& subscribe_all_events(F&& callback, E&& error_handler = error_rethrower);
 
         /**
-         * \brief Set the config of this session
-         * \param config The config to set to
+         * \brief Set the config of this session, leave parameters as default for
+         * not changing that setting
+         * \param cache_size The new cache size
+         * \param enable_websocket Whether to enable websocket
          */
-        void config(const SessionConfig& config) const;
+        void config(utils::OptionalParam<size_t> cache_size = {},
+            utils::OptionalParam<bool> enable_websocket = {}) const;
 
         /**
          * \brief Get the config of this session
@@ -387,6 +408,13 @@ namespace mirai
     ws::Connection& Session::subscribe_messages(F&& callback, E&& error_handler)
     {
         return subscribe("/message",
+            std::forward<F>(callback), std::forward<E>(error_handler));
+    }
+
+    template <typename F, typename E, typename, typename>
+    ws::Connection& Session::subscribe_non_message(F&& callback, E&& error_handler)
+    {
+        return subscribe("/event",
             std::forward<F>(callback), std::forward<E>(error_handler));
     }
 

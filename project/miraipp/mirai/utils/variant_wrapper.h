@@ -41,17 +41,17 @@ namespace mirai::utils
         template <typename T, typename F, typename Obj>
         static void dispatch_impl(Obj&& obj, F&& func)
         {
-            std::forward<Obj>(obj).apply([f=std::forward<F>(func)](auto&& data)
+            std::forward<Obj>(obj).apply([&func](auto&& data)
             {
                 if constexpr (std::is_void_v<T>) // Accept all
                 {
                     if constexpr (std::is_invocable_v<F&&, decltype(data)>)
-                        std::forward<F>(f)(data);
+                        std::forward<F>(func)(data);
                 }
                 else // Use the given T
                 {
                     if constexpr (std::is_same_v<decltype(data), T>)
-                        std::forward<F>(f)(data);
+                        std::forward<F>(func)(data);
                 }
             });
         }

@@ -163,7 +163,7 @@ namespace mirai
             { "id", std::to_string(id) }
         });
         utils::check_response(res);
-        return res.get<Event>();
+        return res["data"].get<Event>();
     }
 
     std::vector<Friend> Session::friend_list() const
@@ -295,13 +295,13 @@ namespace mirai
             client_.reset();
     }
 
-    void Session::config(const SessionConfig& config) const
+    void Session::config(const utils::OptionalParam<size_t> cache_size,
+        const utils::OptionalParam<bool> enable_websocket) const
     {
-        (void)utils::post_json_no_parse("/config", {
-            { "sessionKey", key_ },
-            { "cacheSize", config.cache_size },
-            { "enableWebsocket", config.enable_websocket }
-        });
+        utils::json json{ { "sessionKey", key_ } };
+        if (cache_size) json["cacheSize"] = *cache_size;
+        if (enable_websocket) json["enableWebsocket"] = *enable_websocket;
+        (void)utils::post_json_no_parse("/config", json);
     }
 
     SessionConfig Session::config() const

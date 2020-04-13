@@ -12,6 +12,9 @@ namespace mirai
      */
     class MessageChainNode;
 
+    // TODO: separate received message (with source & quote) and sent message (without those)
+    // TODO: wrap the vector into a convenient class for message processing, since dealing with variants are crappy
+
     /**
      * \brief A chain of message chain nodes, being the whole message
      */

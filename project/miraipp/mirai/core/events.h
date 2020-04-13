@@ -7,91 +7,134 @@
 #include "../utils/variant_wrapper.h"
 #include "../utils/json_extensions.h"
 
-namespace mirai // TODO: needs documentation
+namespace mirai // TODO: finish the documentation
 {
+    /**
+     * \brief Event for receiving a group message
+     */
     struct GroupMessage final
     {
         Message message; ///< The message
         Member sender; ///< Sender of the message
     };
 
+    /**
+     * \brief Event for receiving a friend message
+     */
     struct FriendMessage final
     {
-        Message message;
+        Message message; ///< The messgae
         Friend sender;
     };
 
+    /**
+     * \brief Event received when the bot goes online
+     */
     struct BotOnlineEvent final
     {
-        int64_t qq = 0;
+        int64_t qq = 0; ///< QQ of the bot
     };
 
+    /**
+     * \brief Event received when the bot gets offline actively
+     */
     struct BotOfflineEventActive final
     {
-        int64_t qq = 0;
+        int64_t qq = 0; ///< QQ of the bot
     };
 
+    /**
+     * \brief Event received when the bot is forced offline
+     */
     struct BotOfflineEventForce final
     {
-        int64_t qq = 0;
+        int64_t qq = 0; ///< QQ of the bot
     };
 
+    /**
+     * \brief Event received when the bot is disconnected
+     */
     struct BotOfflineEventDropped final
     {
-        int64_t qq = 0;
+        int64_t qq = 0; ///< QQ of the bot
     };
 
+    /**
+     * \brief Event received when the bot actively re-login
+     */
     struct BotReloginEvent final
     {
-        int64_t qq = 0;
+        int64_t qq = 0; ///< QQ of the bot
     };
 
+    /**
+     * \brief Event received when a group message is recalled by someone
+     */
     struct GroupRecallEvent final
     {
-        int64_t author_id = 0;
-        int32_t message_id = 0;
-        int32_t time = 0;
-        Group group;
-        std::optional<Member> operator_;
+        int64_t author_id = 0; ///< The sender of the recalled message
+        int32_t message_id = 0; ///< The ID of the message
+        int32_t time = 0; ///< Timestamp when the message is sent
+        Group group; ///< The group in which the message is recalled
+        std::optional<Member> operator_; ///< The operator who recalled the message, null if it's the bot
     };
 
+    /**
+     * \brief Event received when a friend message is recalled by someone
+     */
     struct FriendRecallEvent final
     {
-        int64_t author_id = 0;
-        int32_t message_id = 0;
-        int32_t time = 0;
-        int64_t operator_ = 0;
+        int64_t author_id = 0; ///< The sender of the recalled message
+        int32_t message_id = 0; ///< The ID of the message
+        int32_t time = 0; ///< Timestamp when the message is sent
+        int64_t operator_ = 0; ///< QQ of the operator who recalled the message
     };
 
+    /**
+     * \brief Event received when the bot's permission is changed in some group
+     * \remarks The operator can only be the group owner
+     */
     struct BotGroupPermissionChangeEvent final
     {
-        Permission origin{};
-        Permission current{};
-        Group group;
+        Permission origin{}; ///< The original permission
+        Permission current{}; ///< The permission now
+        Group group; ///< The group in which the bot's permission is changed
     };
 
+    /**
+     * \brief Event received when the bot is muted in some group
+     */
     struct BotMuteEvent final
     {
-        int32_t duration_seconds = 0;
-        Member operator_;
+        int32_t duration_seconds = 0; ///< The duration of the mute
+        Member operator_; ///< The operator who muted the bot
     };
 
+    /**
+     * \brief Event received when the bot is unmuted in some group
+     */
     struct BotUnmuteEvent final
     {
-        Member operator_;
+        Member operator_; ///< The operator who unmuted the bot
     };
 
+    /**
+     * \brief Event received when the bot joins any group
+     */
     struct BotJoinGroupEvent final
     {
-        Group group;
+        Group group; ///< The group that the bot joined
     };
 
+    /**
+     * \brief Event received when some group's name is changed
+     */
     struct GroupNameChangeEvent final
     {
-        std::string origin;
-        std::string current;
-        Group group;
-        bool is_by_bot = false;
+        std::string origin; ///< The original group name
+        std::string current; ///< The group name now
+        Group group; ///< The group of which name is changed
+        bool is_by_bot = false; ///< Whether it's the bot who changed the name
     };
 
     struct GroupEntranceAnnouncementChangeEvent final
@@ -99,7 +142,7 @@ namespace mirai // TODO: needs documentation
         std::string origin;
         std::string current;
         Group group;
-        Member operator_;
+        std::optional<Member> operator_;
     };
 
     struct GroupMuteAllEvent final
@@ -228,6 +271,9 @@ namespace mirai // TODO: needs documentation
     using EventVariant = utils::apply_template_t<std::variant, utils::concat_list_t<
         utils::extract_types_t<MessageEventVariant>, utils::extract_types_t<NonMessageEventVariant>>>;
 
+    /**
+     * \brief Enum corresponding to every type of an event, including the two message events
+     */
     enum class EventType
     {
         group_message, friend_message,
