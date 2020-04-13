@@ -7,14 +7,14 @@
 #include "../utils/variant_wrapper.h"
 #include "../utils/json_extensions.h"
 
-namespace mirai // TODO: finish the documentation
+namespace mirai
 {
     /**
      * \brief Event for receiving a group message
      */
     struct GroupMessage final
     {
-        Message message; ///< The message
+        MessageChain message; ///< The message
         Member sender; ///< Sender of the message
     };
 
@@ -23,7 +23,7 @@ namespace mirai // TODO: finish the documentation
      */
     struct FriendMessage final
     {
-        Message message; ///< The messgae
+        MessageChain message; ///< The messgae
         Friend sender;
     };
 
@@ -137,96 +137,134 @@ namespace mirai // TODO: finish the documentation
         bool is_by_bot = false; ///< Whether it's the bot who changed the name
     };
 
+    /**
+     * \brief Event received when the group entrance announcement in some group is changed
+     */
     struct GroupEntranceAnnouncementChangeEvent final
     {
-        std::string origin;
-        std::string current;
-        Group group;
-        std::optional<Member> operator_;
+        std::string origin; ///< The original announcement
+        std::string current; ///< The announcement now
+        Group group; ///< The group of which announcement is changed
+        std::optional<Member> operator_; ///< The operator who changed the announcement, null if it's the bot
     };
 
+    /**
+     * \brief Event received when in some group the mute-all state is changed
+     */
     struct GroupMuteAllEvent final
     {
-        bool origin = false;
-        bool current = false;
-        Group group;
-        std::optional<Member> operator_;
+        bool origin = false; ///< The original state
+        bool current = false; ///< The state now
+        Group group; ///< The group in which the state is changed
+        std::optional<Member> operator_; ///< The operator who changed the state, null if it's the bot
     };
 
+    /**
+     * \brief Event received when in some group the allow anonymous chat state is changed
+     */
     struct GroupAllowAnonymousChatEvent final
     {
-        bool origin = false;
-        bool current = false;
-        Group group;
-        std::optional<Member> operator_;
+        bool origin = false; ///< The original state
+        bool current = false; ///< The state now
+        Group group; ///< The group in which the state is changed
+        std::optional<Member> operator_; ///< The operator who changed the state, null if it's the bot
     };
 
+    /**
+     * \brief Event received when in some group the allow confess talk state is changed
+     */
     struct GroupAllowConfessTalkEvent final
     {
-        bool origin = false;
-        bool current = false;
-        Group group;
-        bool is_by_bot = false;
+        bool origin = false; ///< The original state
+        bool current = false; ///< The state now
+        Group group; ///< The group in which the state is changed
+        bool is_by_bot = false; ///< Whether the state change is by the bot
     };
 
+    /**
+     * \brief Event received when in some group the allow member invitation state is changed
+     */
     struct GroupAllowMemberInviteEvent final
     {
-        bool origin = false;
-        bool current = false;
-        Group group;
-        std::optional<Member> operator_;
+        bool origin = false; ///< The original state
+        bool current = false; ///< The state now
+        Group group; ///< The group in which the state is changed
+        std::optional<Member> operator_; ///< The operator who changed the state, null if it's the bot
     };
 
+    /**
+     * \brief Event received when someone (not the bot) joins a group
+     */
     struct MemberJoinEvent final
     {
-        Member member;
+        Member member; ///< The new group member
     };
 
+    /**
+     * \brief Event received when someone (not the bot) is kicked out of some group
+     */
     struct MemberLeaveEventKick final
     {
-        Member member;
-        std::optional<Member> operator_;
+        Member member; ///< The kicked group member
+        std::optional<Member> operator_; ///< The operator who kicked the member out, null if it's the bot
     };
 
+    /**
+     * \brief Event received when someone (not the bot) leaves some group
+     */
     struct MemberLeaveEventQuit final
     {
-        Member member;
+        Member member; ///< The group member who has left the group
     };
 
+    /**
+     * \brief Event received when someone's group member card is changed
+     */
     struct MemberCardChangeEvent final
     {
-        std::string origin;
-        std::string current;
-        Member member;
-        std::optional<Member> operator_;
+        std::string origin; ///< The original member card
+        std::string current; ///< The member card now
+        Member member; ///< The member whose card got changed
+        std::optional<Member> operator_; ///< The operator who changed, null if it's the bot
     };
 
+    /**
+     * \brief Event received when someone's special title is changed
+     */
     struct MemberSpecialTitleChangeEvent final
     {
-        std::string origin;
-        std::string current;
-        Member member;
+        std::string origin; ///< The original special title
+        std::string current; ///< The special title now
+        Member member; ///< The member whose special title got changed
     };
 
+    /**
+     * \brief Event received when someone's group permission is changed
+     */
     struct MemberPermissionChangeEvent final
     {
-        Permission origin{};
-        Permission current{};
-        Member member;
+        Permission origin{}; ///< The original permission
+        Permission current{}; ///< The permission now
+        Member member; ///< The member whose permission got changed
     };
 
+    /**
+     * \brief Event received when someone is muted in some group
+     */
     struct MemberMuteEvent final
     {
-        int32_t duration_seconds = 0;
-        Member member;
-        std::optional<Member> operator_;
+        int32_t duration_seconds = 0; ///< The duration of the mute in seconds
+        Member member; ///< The member who has got muted
+        std::optional<Member> operator_; ///< The operator who muted the group member, null if it's the bot
     };
 
+    /**
+     * \brief Event received when someone is unmuted in some group
+     */
     struct MemberUnmuteEvent final
     {
-        int32_t duration_seconds = 0;
-        Member member;
-        std::optional<Member> operator_;
+        Member member; ///< The member who has got unmuted
+        std::optional<Member> operator_; ///< The operator who unmuted the group member, null if it's the bot
     };
 
     void from_json(const utils::json& json, GroupMessage& value);
@@ -257,8 +295,8 @@ namespace mirai // TODO: finish the documentation
     void from_json(const utils::json& json, MemberMuteEvent& value);
     void from_json(const utils::json& json, MemberUnmuteEvent& value);
 
-    using MessageEventVariant = std::variant<GroupMessage, FriendMessage>;
-    using NonMessageEventVariant = std::variant<
+    using EventVariant = std::variant<
+        GroupMessage, FriendMessage,
         BotOnlineEvent, BotOfflineEventActive, BotOfflineEventForce, BotOfflineEventDropped,
         BotReloginEvent, GroupRecallEvent, FriendRecallEvent, BotGroupPermissionChangeEvent,
         BotMuteEvent, BotUnmuteEvent, BotJoinGroupEvent, GroupNameChangeEvent,
@@ -267,9 +305,6 @@ namespace mirai // TODO: finish the documentation
         MemberLeaveEventKick, MemberLeaveEventQuit, MemberCardChangeEvent,
         MemberSpecialTitleChangeEvent, MemberPermissionChangeEvent, MemberMuteEvent, MemberUnmuteEvent
     >;
-
-    using EventVariant = utils::apply_template_t<std::variant, utils::concat_list_t<
-        utils::extract_types_t<MessageEventVariant>, utils::extract_types_t<NonMessageEventVariant>>>;
 
     /**
      * \brief Enum corresponding to every type of an event, including the two message events

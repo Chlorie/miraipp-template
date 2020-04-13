@@ -1,4 +1,4 @@
-#include "message.h"
+#include "MessageChain.h"
 
 namespace mirai
 {
@@ -179,7 +179,7 @@ namespace mirai
         }
     }
 
-    Message plain_text(const std::string_view text) { return { { msg::Plain{ std::string(text) } } }; }
+    MessageChain plain_text(const std::string_view text) { return { { msg::Plain{ std::string(text) } } }; }
 
     namespace
     {

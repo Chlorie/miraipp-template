@@ -58,7 +58,7 @@ namespace mirai
     }
 
     int32_t Session::send_friend_message(const int64_t target,
-        const Message& msg, const utils::OptionalParam<int32_t> quote) const
+        const MessageChain& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },
@@ -78,7 +78,7 @@ namespace mirai
     }
 
     int32_t Session::send_group_message(const int64_t target,
-        const Message& msg, const utils::OptionalParam<int32_t> quote) const
+        const MessageChain& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },

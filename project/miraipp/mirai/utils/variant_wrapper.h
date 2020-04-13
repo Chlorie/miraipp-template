@@ -1,28 +1,9 @@
 #pragma once
 
 #include <variant>
-#include "meta.h"
 
 namespace mirai::utils
 {
-    /**
-     * \brief Provide static member for whether a callable is suitable
-     * for visiting a specific variant type
-     * \tparam F Type of the callable object
-     * \tparam V Type of the variant
-     */
-    template <typename F, typename V> struct is_variant_visitable : std::false_type {};
-    template <typename F, typename... Ts> struct is_variant_visitable<F, std::variant<Ts...>> :
-        std::bool_constant<is_visitable_v<F, Ts...>> {};
-
-    /**
-     * \brief Check whether a callable is suitable for visiting a specific variant type
-     * \tparam F Type of the callable object
-     * \tparam V Type of the variant
-     */
-    template <typename F, typename V>
-    constexpr bool is_variant_visitable_v = is_variant_visitable<F, V>::value;
-
     /**
      * \brief A wrapper for easier access of std::variant, providing member functions
      * for query the type index and visiting the variant

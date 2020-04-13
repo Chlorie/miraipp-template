@@ -18,76 +18,112 @@ namespace mirai
     /**
      * \brief A chain of message chain nodes, being the whole message
      */
-    using Message = std::vector<MessageChainNode>;
+    using MessageChain = std::vector<MessageChainNode>;
 
     namespace msg // TODO: needs documentation
     {
+        /**
+         * \brief The source of a message
+         */
         struct Source final
         {
-            int32_t id = 0;
-            int32_t time = 0;
+            int32_t id = 0; ///< The message ID of this message
+            int32_t time = 0; ///< The timestamp when this message was sent
         };
 
+        /**
+         * \brief Quoting a message
+         */
         struct Quote final
         {
-            int32_t id = 0;
-            int64_t group_id = 0;
-            int64_t sender_id = 0;
-            int64_t target_id = 0;
-            Message origin;
+            int32_t id = 0; ///< The ID of the message being quoted
+            int64_t group_id = 0; ///< The group from which the quoted message is sent (group message)
+            int64_t sender_id = 0; ///< The sender of the quoted message (friend message)
+            int64_t target_id = 0; ///< The target of the quoted message (group ID or user ID)
+            MessageChain origin; ///< The original quoted message
         };
 
+        /**
+         * \brief Mentioning someone
+         */
         struct At final
         {
-            int32_t target = 0;
-            std::string display;
+            int32_t target = 0; ///< Mentioned group member ID
+            std::string display; ///< The string for display the @ message
         };
 
+        /**
+         * \brief Mentioning everyone
+         */
         struct AtAll final {};
 
+        /**
+         * \brief QQ emoji
+         */
         struct Face final
         {
-            std::optional<int32_t> face_id = 0;
-            std::optional<std::string> name;
+            std::optional<int32_t> face_id = 0; ///< The ID of the emoji
+            std::optional<std::string> name; ///< The name of the emoji
         };
 
+        /**
+         * \brief Plain text message segment
+         */
         struct Plain final
         {
             std::string text;
         };
 
+        /**
+         * \brief An image
+         */
         struct Image final
         {
-            std::optional<std::string> image_id;
-            std::optional<std::string> url;
-            std::optional<std::string> path;
+            std::optional<std::string> image_id; ///< The ID of the image
+            std::optional<std::string> url; ///< The URL of the image
+            std::optional<std::string> path; ///< The relative path to "plugins/MiraiAPIHTTP/images" of a local image
         };
 
+        /**
+         * \brief A flash image
+         */
         struct FlashImage final
         {
-            std::optional<std::string> image_id;
-            std::optional<std::string> url;
-            std::optional<std::string> path;
+            std::optional<std::string> image_id; ///< The ID of the image
+            std::optional<std::string> url; ///< The URL of the image
+            std::optional<std::string> path; ///< The relative path to "plugins/MiraiAPIHTTP/images" of a local image
         };
 
+        /**
+         * \brief XML text
+         */
         struct Xml final
         {
-            std::string xml;
+            std::string xml; ///< The XML text
         };
 
+        /**
+         * \brief Json text
+         */
         struct Json final
         {
-            std::string json;
+            std::string json; ///< The json text
         };
 
+        /**
+         * \brief QQ mini programs
+         */
         struct App final
         {
-            std::string content;
+            std::string content; ///< The content
         };
 
+        /**
+         * \brief QQ poke message
+         */
         struct Poke final
         {
-            std::string name;
+            std::string name; ///< Type of the poke message
         };
 
         void to_json(utils::json& json, const Source& value);
@@ -143,7 +179,7 @@ namespace mirai
      * \param text The message content
      * \return The message
      */
-    Message plain_text(std::string_view text);
+    MessageChain plain_text(std::string_view text);
 
     void to_json(utils::json& json, const MessageChainNode& value);
     void from_json(const utils::json& json, MessageChainNode& value);
