@@ -1,4 +1,4 @@
-#include "MessageChain.h"
+#include "message.h"
 
 namespace mirai
 {
