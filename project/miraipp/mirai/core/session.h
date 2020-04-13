@@ -325,7 +325,9 @@ namespace mirai
          * handled on another thread, so if any exception is not handled
          * the application will abort.
          */
-        template <typename F, typename E>
+        template <typename F, typename E,
+            typename = std::invoke_result_t<F, Event&>,
+            typename = std::invoke_result_t<E, const RuntimeError&>>
         ws::Connection& subscribe_messages(F&& callback, E&& error_handler = error_rethrower);
 
         /**
@@ -341,7 +343,9 @@ namespace mirai
          * handled on another thread, so if any exception is not handled
          * the application will abort.
          */
-        template <typename F, typename E>
+        template <typename F, typename E,
+            typename = std::invoke_result_t<F, Event&>,
+            typename = std::invoke_result_t<E, const RuntimeError&>>
         ws::Connection& subscribe_all_events(F&& callback, E&& error_handler = error_rethrower);
 
         /**
@@ -365,28 +369,28 @@ namespace mirai
         const std::string uri = utils::strcat("ws://", base_url, url, "?sessionKey=", key_);
         ws::Connection& con = client_->connect(uri);
         con.message_callback([callback = std::forward<F>(callback),
-            error_handler = std::forward<E>(error_handler)](const std::string& msg)
-        {
-            try
+                error_handler = std::forward<E>(error_handler)](const std::string& msg)
             {
-                const utils::json json = utils::json::parse(msg);
-                utils::check_response(json);
-                Event e = json.get<Event>();
-                callback(e);
-            }
-            catch (const RuntimeError& e) { error_handler(e); }
-        });
+                try
+                {
+                    const utils::json json = utils::json::parse(msg);
+                    utils::check_response(json);
+                    Event e = json.get<Event>();
+                    callback(e);
+                }
+                catch (const RuntimeError& e) { error_handler(e); }
+            });
         return con;
     }
 
-    template <typename F, typename E>
+    template <typename F, typename E, typename, typename>
     ws::Connection& Session::subscribe_messages(F&& callback, E&& error_handler)
     {
         return subscribe("/message",
             std::forward<F>(callback), std::forward<E>(error_handler));
     }
 
-    template <typename F, typename E>
+    template <typename F, typename E, typename, typename>
     ws::Connection& Session::subscribe_all_events(F&& callback, E&& error_handler)
     {
         return subscribe("/all",

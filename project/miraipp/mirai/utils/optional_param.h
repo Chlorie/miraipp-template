@@ -16,7 +16,7 @@ namespace mirai::utils
     public:
         OptionalParam() = default;
         OptionalParam(std::nullptr_t) {}
-        OptionalParam(const T& value) :ptr_(&value) {}
+        OptionalParam(const T& value) : ptr_(&value) {}
 
         constexpr const T& operator*() const { return *ptr_; }
         constexpr const T* operator->() const { return ptr_; }

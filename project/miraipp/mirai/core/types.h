@@ -7,16 +7,16 @@ namespace mirai // TODO: needs documentation
     enum class TargetType : bool { friend_, group };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(TargetType, {
-            { TargetType::friend_, "friend" },
-            { TargetType::group, "group" }
+        { TargetType::friend_, "friend" },
+        { TargetType::group, "group" }
         });
 
     enum class Permission { member, administrator, owner };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(Permission, {
-            { Permission::member, "MEMBER" },
-            { Permission::administrator, "ADMINISTRATOR" },
-            { Permission::owner, "OWNER" },
+        { Permission::member, "MEMBER" },
+        { Permission::administrator, "ADMINISTRATOR" },
+        { Permission::owner, "OWNER" },
         });
 
     struct Group final

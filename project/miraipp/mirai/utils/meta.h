@@ -9,7 +9,10 @@ namespace mirai::utils
      * \tparam Ts The type pack
      */
     template <typename... Ts> struct first_type {};
-    template <typename T, typename... Rs> struct first_type<T, Rs...> { using type = T; };
+    template <typename T, typename... Rs> struct first_type<T, Rs...>
+    {
+        using type = T;
+    };
 
     /**
      * \brief Alias of the first type in a type pack
@@ -24,7 +27,7 @@ namespace mirai::utils
     template <typename... Ts> struct same_type : std::false_type {};
     template <> struct same_type<> : std::true_type {};
     template <typename T, typename... Rs>
-    struct same_type<T, Rs...> : std::bool_constant<(std::is_same_v<T, Rs>&& ...)> {};
+    struct same_type<T, Rs...> : std::bool_constant<(std::is_same_v<T, Rs> && ...)> {};
 
     /**
      * \brief Check if all of the types are the same
@@ -60,7 +63,10 @@ namespace mirai::utils
      */
     template <template <typename...> typename Templ, typename List> struct apply_template {};
     template <template <typename...> typename Templ, typename... Ts>
-    struct apply_template<Templ, type_list<Ts...>> { using type = Templ<Ts...>; };
+    struct apply_template<Templ, type_list<Ts...>>
+    {
+        using type = Templ<Ts...>;
+    };
 
     /**
      * \brief Alias for applying a template to a type list
@@ -76,7 +82,10 @@ namespace mirai::utils
      */
     template <typename T> struct extract_types {};
     template <template <typename...> typename Templ, typename... Ts>
-    struct extract_types<Templ<Ts...>> { using type = type_list<Ts...>; };
+    struct extract_types<Templ<Ts...>>
+    {
+        using type = type_list<Ts...>;
+    };
 
     /**
      * \brief Alias to extract a type list from a variadic template type
@@ -91,7 +100,10 @@ namespace mirai::utils
      */
     template <typename K, typename L> struct concat_list {};
     template <typename... Ts, typename... Us>
-    struct concat_list<type_list<Ts...>, type_list<Us...>> { using type = type_list<Ts..., Us...>; };
+    struct concat_list<type_list<Ts...>, type_list<Us...>>
+    {
+        using type = type_list<Ts..., Us...>;
+    };
 
     /**
      * \brief Alias for concatenating two type lists

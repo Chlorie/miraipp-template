@@ -9,8 +9,11 @@ namespace mirai::utils
      * \brief Overload utility class to overload multiple functors
      * \tparam F Types of the functors
      */
-    template <typename... F> struct Overload : F... { using F::operator()...; };
-    template <typename... F> Overload(F...)->Overload<F...>;
+    template <typename... F> struct Overload : F...
+    {
+        using F::operator()...;
+    };
+    template <typename... F> Overload(F ...) -> Overload<F...>;
 
     /**
      * \brief Provide a fallback function object for an overload,
@@ -22,7 +25,7 @@ namespace mirai::utils
     template <typename T>
     auto fallback(T&& value)
     {
-        return[v = std::forward<T>(value)](...)->T
+        return [v = std::forward<T>(value)](...) -> T
         {
             return std::forward<T>(v);
         };
@@ -62,31 +65,27 @@ namespace mirai::utils
 
             // invoke_result_t implies SFINAE so OK
             template <typename... Ts>
-            auto operator()(Ts&&... args) &
-                noexcept(std::is_nothrow_invocable_v<F&, Bs&..., Ts...>)
-                -> std::invoke_result_t<F&, Bs&..., Ts...>
+            auto operator()(Ts&&... args) & noexcept(std::is_nothrow_invocable_v<F&, Bs&..., Ts...>)
+            -> std::invoke_result_t<F&, Bs&..., Ts...>
             {
                 return bind_front_t_call_impl(fd_, tup_, std::forward<Ts>(args)...);
             }
             template <typename... Ts>
-            auto operator()(Ts&&... args) const&
-                noexcept(std::is_nothrow_invocable_v<const F&, const Bs&..., Ts...>)
-                -> std::invoke_result_t<const F&, const Bs&..., Ts...>
+            auto operator()(Ts&&... args) const & noexcept(std::is_nothrow_invocable_v<const F&, const Bs&..., Ts...>)
+            -> std::invoke_result_t<const F&, const Bs&..., Ts...>
             {
                 return bind_front_t_call_impl(fd_, tup_, std::forward<Ts>(args)...);
             }
             template <typename... Ts>
-            auto operator()(Ts&&... args) &&
-                noexcept(std::is_nothrow_invocable_v<F, Bs..., Ts...>)
-                -> std::invoke_result_t<F, Bs..., Ts...>
+            auto operator()(Ts&&... args) && noexcept(std::is_nothrow_invocable_v<F, Bs..., Ts...>)
+            -> std::invoke_result_t<F, Bs..., Ts...>
             {
                 return bind_front_t_call_impl(std::move(fd_), std::move(tup_),
                     std::forward<Ts>(args)...);
             }
             template <typename... Ts>
-            auto operator()(Ts&&... args) const&&
-                noexcept(std::is_nothrow_invocable_v<const F, const Bs..., Ts...>)
-                -> std::invoke_result_t<const F, const Bs..., Ts...>
+            auto operator()(Ts&&... args) const && noexcept(std::is_nothrow_invocable_v<const F, const Bs..., Ts...>)
+            -> std::invoke_result_t<const F, const Bs..., Ts...>
             {
                 return bind_front_t_call_impl(std::move(fd_), std::move(tup_),
                     std::forward<Ts>(args)...);
@@ -94,12 +93,18 @@ namespace mirai::utils
         };
 
         // Deal with std::reference_wrapper
-        template <typename T> struct unwrap { using type = T; };
-        template <typename T> struct unwrap<std::reference_wrapper<T>> { using type = T&; };
+        template <typename T> struct unwrap
+        {
+            using type = T;
+        };
+        template <typename T> struct unwrap<std::reference_wrapper<T>>
+        {
+            using type = T&;
+        };
         template <typename T> using make_tuple_elem_t = typename unwrap<std::decay_t<T>>::type;
 
         template <typename F, typename... Ts>
-        bind_front_t(F, Ts...)->bind_front_t<std::decay_t<F>, make_tuple_elem_t<Ts>...>;
+        bind_front_t(F, Ts ...) -> bind_front_t<std::decay_t<F>, make_tuple_elem_t<Ts>...>;
     }
 
     /**

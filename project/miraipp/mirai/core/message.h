@@ -48,7 +48,10 @@ namespace mirai
             std::optional<std::string> name;
         };
 
-        struct Plain final { std::string text; };
+        struct Plain final
+        {
+            std::string text;
+        };
 
         struct Image final
         {
@@ -64,10 +67,25 @@ namespace mirai
             std::optional<std::string> path;
         };
 
-        struct Xml final { std::string xml; };
-        struct Json final { std::string json; };
-        struct App final { std::string content; };
-        struct Poke final { std::string name; };
+        struct Xml final
+        {
+            std::string xml;
+        };
+
+        struct Json final
+        {
+            std::string json;
+        };
+
+        struct App final
+        {
+            std::string content;
+        };
+
+        struct Poke final
+        {
+            std::string name;
+        };
 
         void to_json(utils::json& json, const Source& value);
         void from_json(const utils::json& json, Source& value);

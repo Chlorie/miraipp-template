@@ -11,7 +11,7 @@ namespace mirai::utils
      * \param c_array The C-style array
      * \return Length of the string (length of the array minus 1)
      */
-    template <size_t N> size_t strlen(const char(&c_array)[N]) { return N - 1; }
+    template <size_t N> size_t strlen(const char (&c_array)[N]) { return N - 1; }
 
     /**
      * \brief Generic string length getter

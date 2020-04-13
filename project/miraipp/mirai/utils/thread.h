@@ -34,7 +34,7 @@ namespace mirai::utils
          * \param args The bound arguments
          */
         template <typename F, typename... Ts, typename = std::enable_if_t<not_thread_v<F>>>
-        explicit Thread(F&& f, Ts&&... args) :thread_(std::forward<F>(f), std::forward<Ts>(args)...) {}
+        explicit Thread(F&& f, Ts&&... args) : thread_(std::forward<F>(f), std::forward<Ts>(args)...) {}
 
         /**
          * \brief Join and destroy the thread
@@ -62,13 +62,13 @@ namespace mirai::utils
          * \return Reference to this object
          */
         Thread& operator=(Thread&& other) noexcept;
-        
+
         /**
          * \brief Swap this thread with another
          * \param other The other object
          */
         void swap(Thread& other) noexcept { std::swap(thread_, other.thread_); }
-        
+
         /**
          * \brief Swap two threads
          * \param lhs The first object

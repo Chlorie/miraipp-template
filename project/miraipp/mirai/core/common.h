@@ -13,7 +13,10 @@ namespace mirai
     /**
      * \brief Exception class for runtime errors in mirai API
      */
-    class RuntimeError : public std::runtime_error { using std::runtime_error::runtime_error; };
+    class RuntimeError : public std::runtime_error
+    {
+        using std::runtime_error::runtime_error;
+    };
 
     /**
      * \brief A simple error handler which logs every error to the console

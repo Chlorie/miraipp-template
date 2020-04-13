@@ -2,7 +2,10 @@
 
 #include <nlohmann/json.hpp>
 
-namespace cpr { class Parameters; }
+namespace cpr
+{
+    class Parameters;
+}
 
 namespace mirai::utils
 {
@@ -15,7 +18,7 @@ namespace mirai::utils
      * \return The text part of the response
      */
     std::string get_no_parse(std::string_view url, const cpr::Parameters& parameters);
-    
+
     /**
      * \brief GET request, throw if status code is not 200 (OK), parse text into json
      * \param url The URL, relative to base_url
@@ -23,7 +26,7 @@ namespace mirai::utils
      * \return The text part of the response, parsed into json
      */
     json get(std::string_view url, const cpr::Parameters& parameters);
-    
+
     /**
      * \brief POST request, throw if status code is not 200 (OK)
      * \param url The URL, relative to base_url

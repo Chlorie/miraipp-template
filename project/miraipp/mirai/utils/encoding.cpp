@@ -22,7 +22,10 @@ namespace mirai::utils
         public:
             IconvDescriptor(const char* src, const char* dst) :
                 data_(iconv_open(dst, src)) {}
-            ~IconvDescriptor() noexcept { iconv_close(data_); }
+            ~IconvDescriptor() noexcept
+            {
+                iconv_close(data_);
+            }
             std::string convert(const std::string_view text, const float capability_factor) const
             {
                 if (text.empty()) return {};

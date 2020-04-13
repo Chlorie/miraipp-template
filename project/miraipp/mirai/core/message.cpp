@@ -180,7 +180,7 @@ namespace mirai
     }
 
     Message plain_text(const std::string_view text) { return { { msg::Plain{ std::string(text) } } }; }
-    
+
     namespace
     {
         constexpr std::array<std::string_view, std::variant_size_v<msg::Variant>> msg_types
@@ -195,8 +195,8 @@ namespace mirai
         {
             const std::string& type = json["type"].get_ref<const std::string&>();
             ((type == msg_types[I]
-                ? value = json.get<std::variant_alternative_t<I, msg::Variant>>()
-                : (void)0), ...);
+                  ? value = json.get<std::variant_alternative_t<I, msg::Variant>>()
+                  : (void)0), ...);
         }
     }
 

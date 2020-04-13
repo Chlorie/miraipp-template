@@ -21,11 +21,30 @@ namespace mirai // TODO: needs documentation
         Friend sender;
     };
 
-    struct BotOnlineEvent final { int64_t qq = 0; };
-    struct BotOfflineEventActive final { int64_t qq = 0; };
-    struct BotOfflineEventForce final { int64_t qq = 0; };
-    struct BotOfflineEventDropped final { int64_t qq = 0; };
-    struct BotReloginEvent final { int64_t qq = 0; };
+    struct BotOnlineEvent final
+    {
+        int64_t qq = 0;
+    };
+
+    struct BotOfflineEventActive final
+    {
+        int64_t qq = 0;
+    };
+
+    struct BotOfflineEventForce final
+    {
+        int64_t qq = 0;
+    };
+
+    struct BotOfflineEventDropped final
+    {
+        int64_t qq = 0;
+    };
+
+    struct BotReloginEvent final
+    {
+        int64_t qq = 0;
+    };
 
     struct GroupRecallEvent final
     {
@@ -57,8 +76,15 @@ namespace mirai // TODO: needs documentation
         Member operator_;
     };
 
-    struct BotUnmuteEvent final { Member operator_; };
-    struct BotJoinGroupEvent final { Group group; };
+    struct BotUnmuteEvent final
+    {
+        Member operator_;
+    };
+
+    struct BotJoinGroupEvent final
+    {
+        Group group;
+    };
 
     struct GroupNameChangeEvent final
     {
@@ -108,7 +134,10 @@ namespace mirai // TODO: needs documentation
         std::optional<Member> operator_;
     };
 
-    struct MemberJoinEvent final { Member member; };
+    struct MemberJoinEvent final
+    {
+        Member member;
+    };
 
     struct MemberLeaveEventKick final
     {
@@ -116,7 +145,10 @@ namespace mirai // TODO: needs documentation
         std::optional<Member> operator_;
     };
 
-    struct MemberLeaveEventQuit final { Member member; };
+    struct MemberLeaveEventQuit final
+    {
+        Member member;
+    };
 
     struct MemberCardChangeEvent final
     {

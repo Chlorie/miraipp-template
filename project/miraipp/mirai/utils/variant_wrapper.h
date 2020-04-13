@@ -37,6 +37,24 @@ namespace mirai::utils
         using visit_result_t = decltype((std::visit(std::declval<F&&>(), std::declval<D>())));
 
         VariantType data_;
+
+        template <typename T, typename F, typename Obj>
+        static void dispatch_impl(Obj&& obj, F&& func)
+        {
+            std::forward<Obj>(obj).apply([f=std::forward<F>(func)](auto&& data)
+            {
+                if constexpr (std::is_void_v<T>) // Accept all
+                {
+                    if constexpr (std::is_invocable_v<F&&, decltype(data)>)
+                        std::forward<F>(f)(data);
+                }
+                else // Use the given T
+                {
+                    if constexpr (std::is_same_v<decltype(data), T>)
+                        std::forward<F>(f)(data);
+                }
+            });
+        }
     public:
         using Type = EnumType;
         using Variant = VariantType;
@@ -50,13 +68,13 @@ namespace mirai::utils
          * \brief Copy a variant
          * \param variant The other variant
          */
-        VariantWrapper(const Variant& variant) :data_(variant) {}
+        VariantWrapper(const Variant& variant) : data_(variant) {}
 
         /**
          * \brief Move a variant
          * \param variant The other variant
          */
-        VariantWrapper(Variant&& variant) :data_(std::move(variant)) {}
+        VariantWrapper(Variant&& variant) : data_(std::move(variant)) {}
 
         /**
          * \brief Copy a variant
@@ -181,5 +199,25 @@ namespace mirai::utils
         {
             return std::visit(std::forward<F>(func), data_);
         }
+
+        /**
+         * \brief Call a function object on the variant if the type of the variant matches
+         * \tparam T The type you want to dispatch to, leave as void to accept all types that
+         * is valid to call the function object
+         * \tparam F The type of the function object, don't specify this for auto deduction
+         * \param func The function object
+         */
+        template <typename T = void, typename F = void>
+        void dispatch(F&& func) { dispatch_impl<T>(*this, std::forward<F>(func)); }
+
+        /**
+         * \brief Call a function object on the variant if the type of the variant matches
+         * \tparam T The type you want to dispatch to, leave as void to accept all types that
+         * is valid to call the function object
+         * \tparam F The type of the function object, don't specify this for auto deduction
+         * \param func The function object
+         */
+        template <typename T = void, typename F = void>
+        void dispatch(F&& func) const { dispatch_impl<T>(*this, std::forward<F>(func)); }
     };
 }
