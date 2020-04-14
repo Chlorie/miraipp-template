@@ -1,16 +1,16 @@
 #pragma once
 
 #include <string>
-#include "message.h"
 #include "types.h"
 #include "events.h"
 #include "common.h"
+#include "message/segment.h"
+#include "websockets/client.h"
 #include "../utils/optional_param.h"
 #include "../utils/array_proxy.h"
 #include "../utils/functional.h"
 #include "../utils/request.h"
 #include "../utils/string.h"
-#include "../websockets/client.h"
 
 namespace mirai
 {
@@ -302,7 +302,7 @@ namespace mirai
         MemberInfo member_info(int64_t group, int64_t member) const;
 
         /**
-         * \brief Start the websocket client
+         * \brief Start up the websocket client on another thread
          */
         void start_websocket_client();
 
@@ -311,6 +311,12 @@ namespace mirai
          * also be closed
          */
         void close_websocket_client();
+
+        /**
+         * \brief Close a WebSocket connection
+         * \param connection The connection
+         */
+        void close_connection(ws::Connection& connection);
 
         /**
          * \brief Listen on message events received using the callback
@@ -327,7 +333,7 @@ namespace mirai
          */
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
-            typename = std::invoke_result_t<E, const RuntimeError&>>
+            typename = std::invoke_result_t<E>>
         ws::Connection& subscribe_messages(F&& callback, E&& error_handler = error_rethrower);
 
         /**
@@ -345,7 +351,7 @@ namespace mirai
          */
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
-            typename = std::invoke_result_t<E, const RuntimeError&>>
+            typename = std::invoke_result_t<E>>
         ws::Connection& subscribe_non_message(F&& callback, E&& error_handler = error_rethrower);
 
         /**
@@ -363,7 +369,7 @@ namespace mirai
          */
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
-            typename = std::invoke_result_t<E, const RuntimeError&>>
+            typename = std::invoke_result_t<E>>
         ws::Connection& subscribe_all_events(F&& callback, E&& error_handler = error_rethrower);
 
         /**
@@ -399,7 +405,7 @@ namespace mirai
                     Event e = json.get<Event>();
                     callback(e);
                 }
-                catch (const RuntimeError& e) { error_handler(e); }
+                catch (...) { error_handler(); }
             });
         return con;
     }

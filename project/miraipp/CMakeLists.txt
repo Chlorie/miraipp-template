@@ -2,9 +2,9 @@
 
 set(SOURCE_FILES
     "mirai/core/session.cpp" "mirai/core/common.cpp"
-    "mirai/core/message.cpp" "mirai/core/events.cpp" "mirai/core/types.cpp"
-    "mirai/utils/thread.cpp" "mirai/utils/encoding.cpp" "mirai/utils/request.cpp" 
-    "mirai/websockets/client.cpp" "mirai/websockets/connection.cpp")
+     "mirai/core/events.cpp" "mirai/core/types.cpp"
+    "mirai/core/websockets/client.cpp" "mirai/core/websockets/connection.cpp"
+    "mirai/utils/thread.cpp" "mirai/utils/encoding.cpp" "mirai/utils/request.cpp" "mirai/core/message/message.cpp" "mirai/core/message/segment.cpp" "mirai/core/message/stringified_message.cpp" "mirai/core/message/common.cpp" "mirai/core/message/received_message.cpp") 
 
 add_library(miraipp ${SOURCE_FILES})
 target_include_directories(miraipp INTERFACE ./)

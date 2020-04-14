@@ -20,13 +20,11 @@ namespace mirai
 
     /**
      * \brief A simple error handler which logs every error to the console
-     * \param e The exception
      */
-    void error_logger(const RuntimeError& e);
+    void error_logger();
 
     /**
-     * \brief A simple error handler which rethrows every error to the console
-     * \param e The exception
+     * \brief A simple error handler which rethrows every error
      */
-    void error_rethrower(const RuntimeError& e);
+    inline void error_rethrower() { throw; }
 }

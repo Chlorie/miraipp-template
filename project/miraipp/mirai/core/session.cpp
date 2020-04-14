@@ -295,6 +295,8 @@ namespace mirai
             client_.reset();
     }
 
+    void Session::close_connection(ws::Connection& connection) { client_->close(connection); }
+
     void Session::config(const utils::OptionalParam<size_t> cache_size,
         const utils::OptionalParam<bool> enable_websocket) const
     {

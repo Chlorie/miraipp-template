@@ -3,7 +3,7 @@
 #include <optional>
 #include <variant>
 #include "types.h"
-#include "message.h"
+#include "message/received_message.h"
 #include "../utils/variant_wrapper.h"
 #include "../utils/json_extensions.h"
 

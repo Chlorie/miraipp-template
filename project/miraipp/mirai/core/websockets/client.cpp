@@ -1,7 +1,6 @@
 #include "client.h"
-#include "../core/common.h"
-#include "../utils/encoding.h"
-#include "../utils/functional.h"
+#include "../common.h"
+#include "../../utils/functional.h"
 
 namespace mirai::ws
 {
@@ -14,9 +13,7 @@ namespace mirai::ws
         thread_ = utils::Thread([&client = client_]()
         {
             try { client.run(); }
-            catch (const RuntimeError& e) { std::cerr << utils::utf8_to_local(e.what()) << '\n'; }
-            catch (const std::exception& e) { std::cerr << e.what() << '\n'; }
-            catch (...) { std::cerr << "Unknown error\n"; }
+            catch (...) { error_logger(); }
         });
     }
 

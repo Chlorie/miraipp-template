@@ -4,10 +4,24 @@
 
 namespace mirai
 {
-    void error_logger(const RuntimeError& e)
+    void error_logger()
     {
-        std::cerr << utils::utf8_to_local(e.what()) << '\n';
+        try { throw; }
+        catch (const RuntimeError& e)
+        {
+            std::cerr << "[Mirai Runtime Error] " << utils::utf8_to_local(e.what()) << '\n';
+        }
+        catch (const std::runtime_error& e)
+        {
+            std::cerr << "[Runtime Error] " << e.what() << '\n';
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "[Exception] " << e.what() << '\n';
+        }
+        catch (...)
+        {
+            std::cerr << "[Unknown Error]\n";
+        }
     }
-
-    void error_rethrower(const RuntimeError& e) { throw e; }
 }
