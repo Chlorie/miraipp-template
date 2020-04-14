@@ -4,6 +4,15 @@
 
 namespace mirai::utils
 {
+    namespace detail
+    {
+        template <typename Var, typename T> struct in_variant {};
+        template <typename... Ts, typename T>
+        struct in_variant<std::variant<Ts...>, T> :
+            std::bool_constant<(std::is_same_v<Ts, T> || ...)> {};
+        template <typename Var, typename T> constexpr bool in_variant_v = in_variant<Var, T>::value;
+    }
+
     /**
      * \brief A wrapper for easier access of std::variant, providing member functions
      * for query the type index and visiting the variant
@@ -46,6 +55,15 @@ namespace mirai::utils
         VariantWrapper() = default;
 
         /**
+         * \brief Construct a variant with any of the underlying types
+         * \tparam T Type of the object
+         * \param object The object
+         */
+        template <typename T, typename =
+            std::enable_if_t<detail::in_variant_v<VariantType, std::decay_t<T>>>>
+        VariantWrapper(T&& object): data_(std::forward<T>(object)) {}
+
+        /**
          * \brief Copy a variant
          * \param variant The other variant
          */
@@ -84,6 +102,22 @@ namespace mirai::utils
          * \return The type
          */
         Type type() const { return Type(data_.index()); }
+
+        /**
+         * \brief Check if two variants are equal
+         * \param lhs The first variant
+         * \param rhs The second variant
+         * \return The result
+         */
+        friend bool operator==(const VariantWrapper& lhs, const VariantWrapper& rhs) { return lhs.data_ == rhs.data_; }
+
+        /**
+         * \brief Check if two variants are not equal
+         * \param lhs The first variant
+         * \param rhs The second variant
+         * \return The result
+         */
+        friend bool operator!=(const VariantWrapper& lhs, const VariantWrapper& rhs) { return !(lhs == rhs); }
 
         /**
          * \brief Get the data with a specific type, throw if the types don't match

@@ -58,7 +58,7 @@ namespace mirai
     }
 
     int32_t Session::send_friend_message(const int64_t target,
-        const MessageChain& msg, const utils::OptionalParam<int32_t> quote) const
+        const Message& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },
@@ -74,11 +74,11 @@ namespace mirai
     int32_t Session::send_friend_message(const int64_t target,
         const std::string_view msg, const utils::OptionalParam<int32_t> quote) const
     {
-        return send_friend_message(target, plain_text(msg), quote);
+        return send_friend_message(target, Message(msg), quote);
     }
 
     int32_t Session::send_group_message(const int64_t target,
-        const MessageChain& msg, const utils::OptionalParam<int32_t> quote) const
+        const Message& msg, const utils::OptionalParam<int32_t> quote) const
     {
         utils::json json{
             { "sessionKey", key_ },
@@ -94,7 +94,7 @@ namespace mirai
     int32_t Session::send_group_message(const int64_t target,
         const std::string_view msg, const utils::OptionalParam<int32_t> quote) const
     {
-        return send_group_message(target, plain_text(msg), quote);
+        return send_group_message(target, Message(msg), quote);
     }
 
     std::vector<std::string> Session::send_image_message(

@@ -14,7 +14,7 @@ namespace mirai
      */
     struct GroupMessage final
     {
-        MessageChain message; ///< The message
+        ReceivedMessage message; ///< The message
         Member sender; ///< Sender of the message
     };
 
@@ -23,7 +23,7 @@ namespace mirai
      */
     struct FriendMessage final
     {
-        MessageChain message; ///< The messgae
+        ReceivedMessage message; ///< The messgae
         Friend sender;
     };
 

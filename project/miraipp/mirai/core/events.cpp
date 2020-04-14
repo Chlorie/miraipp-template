@@ -199,7 +199,7 @@ namespace mirai
         {
             const std::string& type = json["type"].get_ref<const std::string&>();
             ((type == event_types[I]
-                  ? value = json.get<std::variant_alternative_t<I, EventVariant>>()
+                  ? value = Event(json.get<std::variant_alternative_t<I, EventVariant>>())
                   : (void)0), ...);
         }
     }

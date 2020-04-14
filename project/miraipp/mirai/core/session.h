@@ -117,7 +117,7 @@ namespace mirai
          * \param quote The message to be quoted (optional)
          * \return The message ID of the message sent
          */
-        int32_t send_friend_message(int64_t target, const MessageChain& msg,
+        int32_t send_friend_message(int64_t target, const Message& msg,
             utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
@@ -137,7 +137,7 @@ namespace mirai
          * \param quote The message to be quoted (optional)
          * \return The message ID of the message sent
          */
-        int32_t send_group_message(int64_t target, const MessageChain& msg,
+        int32_t send_group_message(int64_t target, const Message& msg,
             utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
