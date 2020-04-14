@@ -14,7 +14,8 @@ namespace mirai
 
     inline bool is_plain(const Segment& node) { return node.type() == SegmentType::plain; }
 
-    inline std::string& get_text(Segment& node) { return node.get<msg::Plain>().text; }
+    inline std::string& get_plain(Segment& node) { return node.get<msg::Plain>().text; }
+    inline const std::string& get_plain(const Segment& node) { return node.get<msg::Plain>().text; }
 
     void combine_adjacent_text(MessageChain& chain);
 }

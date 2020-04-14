@@ -1,7 +1,6 @@
 #pragma once
 
 #include "segment.h"
-#include "stringified_message.h"
 
 namespace mirai
 {
@@ -12,7 +11,7 @@ namespace mirai
     {
         msg::Source source; ///< Source of the message
         std::optional<msg::Quote> quote; ///< If exists, quotation of the message
-        StringifiedMessage content; ///< The real message content
+        Message content; ///< The real message content
     };
 
     void from_json(const utils::json& json, ReceivedMessage& value);

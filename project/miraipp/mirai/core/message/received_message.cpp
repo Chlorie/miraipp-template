@@ -14,6 +14,7 @@ namespace mirai
             else
                 chain.emplace_back(node.get<Segment>());
         }
+        if (value.quote) chain.erase(chain.begin()); // Quote messages contains an extra At
         value.content = std::move(chain);
     }
 }

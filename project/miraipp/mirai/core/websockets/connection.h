@@ -5,7 +5,7 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <functional>
 
-namespace mirai::ws // TODO: needs documentation
+namespace mirai::ws
 {
     namespace wspp = websocketpp;
 

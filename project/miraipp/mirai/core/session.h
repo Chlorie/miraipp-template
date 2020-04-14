@@ -326,10 +326,9 @@ namespace mirai
          * \param error_handler The error handler
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
-         * both of the message types. The error handler should be able
-         * to handle mirai::RuntimeError exceptions. The events will be
-         * handled on another thread, so if any exception is not handled
-         * the application will abort.
+         * both of the message types. The events will be handled on
+         * another thread, so if any exception is not handled the
+         * application will abort.
          */
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
@@ -344,8 +343,7 @@ namespace mirai
          * \param error_handler The error handler
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
-         * all of the non-message event types. The error handler should be able
-         * to handle mirai::RuntimeError exceptions. The events will be
+         * all of the non-message event types. The events will be
          * handled on another thread, so if any exception is not handled
          * the application will abort.
          */
@@ -362,10 +360,9 @@ namespace mirai
          * \param error_handler The error handler
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
-         * all of the event types. The error handler should be able
-         * to handle mirai::RuntimeError exceptions. The events will be
-         * handled on another thread, so if any exception is not handled
-         * the application will abort.
+         * all of the event types. The events will be handled on another
+         * thread, so if any exception is not handled the application
+         * will abort.
          */
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,

@@ -32,7 +32,7 @@ namespace mirai
             int64_t group_id = 0; ///< The group from which the quoted message is sent (group message)
             int64_t sender_id = 0; ///< The sender of the quoted message (friend message)
             int64_t target_id = 0; ///< The target of the quoted message (group ID or user ID)
-            MessageChain origin; ///< The original quoted message
+            Message origin; ///< The original quoted message
             friend bool operator==(const Quote& lhs, const Quote& rhs)
             {
                 return lhs.id == rhs.id
@@ -48,8 +48,13 @@ namespace mirai
          */
         struct At final
         {
-            int32_t target = 0; ///< Mentioned group member ID
+            int64_t target = 0; ///< Mentioned group member ID
             std::string display; ///< The string for display the @ message
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const At& lhs, const At& rhs) { return lhs.target == rhs.target; }
             friend bool operator!=(const At& lhs, const At& rhs) { return !(lhs == rhs); }
         };
@@ -59,6 +64,11 @@ namespace mirai
          */
         struct AtAll final
         {
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const { return "{at_all}"; }
             friend bool operator==(AtAll, AtAll) { return true; }
             friend bool operator!=(AtAll, AtAll) { return false; }
         };
@@ -70,6 +80,11 @@ namespace mirai
         {
             std::optional<int32_t> face_id = 0; ///< The ID of the emoji
             std::optional<std::string> name; ///< The name of the emoji
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const Face& lhs, const Face& rhs)
             {
                 if (lhs.face_id && rhs.face_id) return lhs.face_id == rhs.face_id;
@@ -84,6 +99,11 @@ namespace mirai
         struct Plain final
         {
             std::string text;
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const { return Message::escape(text); }
             friend bool operator==(const Plain& lhs, const Plain& rhs) { return lhs.text == rhs.text; }
             friend bool operator!=(const Plain& lhs, const Plain& rhs) { return !(lhs == rhs); }
         };
@@ -96,6 +116,11 @@ namespace mirai
             std::optional<std::string> image_id; ///< The ID of the image
             std::optional<std::string> url; ///< The URL of the image
             std::optional<std::string> path; ///< The relative path to "plugins/MiraiAPIHTTP/images" of a local image
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const Image& lhs, const Image& rhs)
             {
                 if (lhs.image_id && rhs.image_id) return lhs.image_id == rhs.image_id;
@@ -113,6 +138,11 @@ namespace mirai
             std::optional<std::string> image_id; ///< The ID of the image
             std::optional<std::string> url; ///< The URL of the image
             std::optional<std::string> path; ///< The relative path to "plugins/MiraiAPIHTTP/images" of a local image
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const FlashImage& lhs, const FlashImage& rhs)
             {
                 if (lhs.image_id && rhs.image_id) return lhs.image_id == rhs.image_id;
@@ -128,6 +158,11 @@ namespace mirai
         struct Xml final
         {
             std::string xml; ///< The XML text
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const Xml& lhs, const Xml& rhs) { return lhs.xml == rhs.xml; }
             friend bool operator!=(const Xml& lhs, const Xml& rhs) { return !(lhs == rhs); }
         };
@@ -138,6 +173,11 @@ namespace mirai
         struct Json final
         {
             std::string json; ///< The json text
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const Json& lhs, const Json& rhs) { return lhs.json == rhs.json; }
             friend bool operator!=(const Json& lhs, const Json& rhs) { return !(lhs == rhs); }
         };
@@ -148,6 +188,11 @@ namespace mirai
         struct App final
         {
             std::string content; ///< The content
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const App& lhs, const App& rhs) { return lhs.content == rhs.content; }
             friend bool operator!=(const App& lhs, const App& rhs) { return !(lhs == rhs); }
         };
@@ -158,6 +203,11 @@ namespace mirai
         struct Poke final
         {
             std::string name; ///< Type of the poke message
+            /**
+             * \brief Get a string representation of this object
+             * \return The string
+             */
+            std::string stringify() const;
             friend bool operator==(const Poke& lhs, const Poke& rhs) { return lhs.name == rhs.name; }
             friend bool operator!=(const Poke& lhs, const Poke& rhs) { return !(lhs == rhs); }
         };
@@ -221,4 +271,5 @@ namespace mirai
     void to_json(utils::json& json, const Segment& value);
     void from_json(const utils::json& json, Segment& value);
     void to_json(utils::json& json, const Message& value);
+    void from_json(const utils::json& json, Message& value);
 }

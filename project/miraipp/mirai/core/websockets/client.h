@@ -14,8 +14,8 @@ namespace mirai::ws
     class Client final
     {
     private:
-        AsioClient client_;
         utils::Thread thread_;
+        AsioClient client_;
         std::vector<std::unique_ptr<Connection>> connections_;
     public:
         /**

@@ -12,14 +12,9 @@ namespace mirai
      */
     using MessageChain = std::vector<Segment>;
 
-    class StringifiedMessage;
-
     /**
-     * \brief A message type wrapping message chain, suitable for modifying operations
-     * \remarks This class is designed for constructing new messages more easily (for
-     * sending new messages), but not designed for pattern matching of the message
-     * (for parsing incoming messages). For parsing incoming messages, please use the
-     * message wrapper type StringifiedMessage.
+     * \brief A message type wrapping message chain, containing member functions
+     * for better manipulating and consuming of the messages.
      */
     class Message final
     {
@@ -44,12 +39,6 @@ namespace mirai
         explicit Message(Segment node);
 
         /**
-         * \brief Construct a message with the chain contained in a stringified message
-         * \param message The stringified message
-         */
-        explicit Message(StringifiedMessage message); // TODO: redundant copy of the string
-
-        /**
          * \brief Construct a message using a plain text string
          * \param plain_text The plain text string
          */
@@ -68,13 +57,6 @@ namespace mirai
          * \return Reference to this object
          */
         Message& operator=(Segment node);
-
-        /**
-         * \brief Assign a message with the chain contained in a stringified message
-         * \param message The stringified message
-         * \return Reference to this object
-         */
-        Message& operator=(StringifiedMessage message);
 
         /**
          * \brief Assign a plain text string to this object
@@ -227,5 +209,97 @@ namespace mirai
          * \remarks For more advanced checking use StringifiedMessage
          */
         friend bool operator!=(const Message& lhs, const Message& rhs) { return !(lhs == rhs); }
+        
+        /**
+         * \brief Check whether a message and a plain text string are the same
+         * \param lhs The message
+         * \param rhs The plain text string
+         * \return The result
+         */
+        friend bool operator==(const Message& lhs, std::string_view rhs);
+
+        /**
+         * \brief Check whether a message and a plain text string are the same
+         * \param lhs The plain text string
+         * \param rhs The message
+         * \return The result
+         */
+        friend bool operator==(const std::string_view lhs, const Message& rhs) { return rhs == lhs; }
+
+        /**
+         * \brief Check whether a message and a plain text string are not the same
+         * \param lhs The message
+         * \param rhs The plain text string
+         * \return The result
+         */
+        friend bool operator!=(const Message& lhs, const std::string_view rhs) { return !(lhs == rhs); }
+
+        /**
+         * \brief Check whether a message and a plain text string are not the same
+         * \param lhs The plain text string
+         * \param rhs The message
+         * \return The result
+         */
+        friend bool operator!=(const std::string_view lhs, const Message& rhs) { return !(lhs == rhs); }
+
+        /**
+         * \brief Get the concatenation of all plain text segments 
+         * \return The concatenated text
+         * \remarks When the text strings extracted from two messages compare equal,
+         * it doesn't mean that the two messages must be the same. Use operator== for
+         * exact comparison.
+         */
+        std::string extract_text() const;
+
+        /**
+         * \brief Get the stringified version of the message
+         * \return The string
+         * \remarks Plain text strings are escaped by the escaping rules defined
+         * by the escape function. Segments of other types are stringified to
+         * reference blocks. For stringification rules of all segment types, please
+         * refer to documentation of respective segment type.
+         */
+        std::string stringify() const;
+        
+        /**
+         * \brief Check whether the message starts with the given string
+         * \param text The plain text string
+         * \return The result
+         */
+        bool starts_with(std::string_view text) const;
+
+        /**
+         * \brief Check whether the message ends with the given string
+         * \param text The plain text string
+         * \return The result
+         */
+        bool ends_with(std::string_view text) const;
+
+        /**
+         * \brief Check whether the message contains the given string
+         * \param text The plain text string
+         * \return The result
+         */
+        bool contains(std::string_view text) const;
+
+        /**
+         * \brief Escape a string for stringification
+         * \param unescaped The unescaped string
+         * \return The escaped string
+         * \remarks To avoid conflict with the non-text blocks in stringified messages
+         * like "{at:123456789}", we use the escaping rules as follows: <p>
+         * "{" -> "[[", "}" -> "]]", "[" -> "\[", "]" -> "\]", "\" -> "\\" <p>
+         * This escaping rule is used for easy regex
+         * matching.
+         */
+        static std::string escape(std::string_view unescaped);
+        
+        /**
+         * \brief Unescape an escaped string
+         * \param escaped The escaped string
+         * \return The unescaped string
+         * \remarks See the escape function for detailed escaping rule description.
+         */
+        static std::string unescape(std::string_view escaped);
     };
 }

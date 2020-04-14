@@ -25,6 +25,7 @@ namespace mirai::ws
             try { close(*connection); }
             catch (...) {}
         }
+
     }
 
     Connection& Client::connect(const std::string& uri)

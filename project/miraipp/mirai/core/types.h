@@ -2,7 +2,7 @@
 
 #include "../utils/json_extensions.h"
 
-namespace mirai // TODO: needs documentation
+namespace mirai
 {
     /**
      * \brief Whether the target is friend or group

@@ -12,8 +12,8 @@ namespace mirai
             const auto next = std::next(first);
             const auto last = std::find_if_not(next, chain.end(), is_plain);
             offset = size_t(last - chain.begin());
-            std::string& text = get_text(*first);
-            for (auto iter = next; iter != last; ++iter) text += get_text(*iter);
+            std::string& text = get_plain(*first);
+            for (auto iter = next; iter != last; ++iter) text += get_plain(*iter);
             chain.erase(next, last);
         }
     }
