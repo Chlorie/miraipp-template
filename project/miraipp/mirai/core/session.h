@@ -27,10 +27,15 @@ namespace mirai
         std::string key_;
         std::unique_ptr<ws::Client> client_;
 
+        std::vector<std::string> send_image_message(utils::OptionalParam<int64_t> qq,
+            utils::OptionalParam<int64_t> group,
+            utils::ArrayProxy<std::string> urls) const;
+
+        std::vector<Event> get_events(std::string_view url, size_t count) const;
+
         template <typename F, typename E>
         ws::Connection& subscribe(std::string_view url,
             F&& callback, E&& error_handler);
-
     public:
         /**
          * \brief Construct a default invalid Session object
@@ -131,6 +136,28 @@ namespace mirai
             utils::OptionalParam<int32_t> quote = {}) const;
 
         /**
+         * \brief Send message to a temporary group member chat
+         * \param qq Target QQ to send the message to
+         * \param group Target group to start the temporary chat
+         * \param msg The message to send
+         * \param quote The message to be quoted (optional)
+         * \return The message ID of the message sent
+         */
+        int32_t send_temp_message(int64_t qq, int64_t group, const Message& msg,
+            utils::OptionalParam<int32_t> quote = {}) const;
+
+        /**
+         * \brief Send plain text message to a temporary group member chat
+         * \param qq Target QQ to send the message to
+         * \param group Target group to start the temporary chat
+         * \param msg The message to send
+         * \param quote The message to be quoted (optional)
+         * \return The message ID of the message sent
+         */
+        int32_t send_temp_message(int64_t qq, int64_t group, std::string_view msg,
+            utils::OptionalParam<int32_t> quote = {}) const;
+
+        /**
          * \brief Send message to a group
          * \param target Target group to send the message to
          * \param msg The message to send
@@ -149,18 +176,6 @@ namespace mirai
          */
         int32_t send_group_message(int64_t target, std::string_view msg,
             utils::OptionalParam<int32_t> quote = {}) const;
-
-        /**
-         * \brief Send images via URLs
-         * \param target Target ID to send the message to
-         * \param type Target type (friend or group)
-         * \param urls Image URLs
-         * \return The ID list of the images
-         * \remark This function is supposed to be used only if you
-         * need to retrieve image ID from URLs
-         */
-        std::vector<std::string> send_image_message(int64_t target, TargetType type,
-            utils::ArrayProxy<std::string> urls) const;
 
         /**
          * \brief Send images to a friend via URLs
@@ -185,6 +200,18 @@ namespace mirai
             utils::ArrayProxy<std::string> urls) const;
 
         /**
+         * \brief Send images to a temporary chat via URLs
+         * \param qq Target QQ
+         * \param group Target group
+         * \param urls Image URLs
+         * \return The ID list of the images
+         * \remark This function is supposed to be used only if you
+         * need to retrieve image ID from URLs
+         */
+        std::vector<std::string> send_temp_image_message(int64_t qq, int64_t group,
+            utils::ArrayProxy<std::string> urls) const;
+
+        /**
          * \brief Upload an image to the server
          * \param type Target type (friend or group)
          * \param path The path to the image file
@@ -199,16 +226,41 @@ namespace mirai
          * \param message_id The ID of the message to recall
          * \remarks As for now (mirai core 0.35), recalling friend messages are not supported
          */
-        void recall(int32_t message_id) const; // TODO: maybe return whether the operation is success
+        void recall(int32_t message_id) const;
 
         /**
-         * \brief Fetch an amount of events
-         * \param count Amount of events to fetch
+         * \brief Pop oldest events from the event queue
+         * \param count Amount of events to get
          * \return The events
-         * \remark This function is called fetchMessage in the HTTP API,
-         * but here the events and messages altogether are called "events"
          */
         std::vector<Event> fetch_events(size_t count = 10) const;
+
+        /**
+         * \brief Pop latest events from the event queue
+         * \param count Amount of events to get
+         * \return The events
+         */
+        std::vector<Event> fetch_latest_events(size_t count = 10) const;
+
+        /**
+         * \brief Peek oldest events from the event queue
+         * \param count Amount of events to get
+         * \return The events
+         */
+        std::vector<Event> peek_events(size_t count = 10) const;
+
+        /**
+         * \brief Peek latest events from the event queue
+         * \param count Amount of events to get
+         * \return The events
+         */
+        std::vector<Event> peek_latest_events(size_t count = 10) const;
+
+        /**
+         * \brief Count remaining events in the event queue
+         * \return The count
+         */
+        size_t count_events() const;
 
         /**
          * \brief Get the content of a message from its ID

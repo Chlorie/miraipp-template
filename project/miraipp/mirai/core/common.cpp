@@ -1,9 +1,18 @@
 #include "common.h"
 #include <iostream>
+#include <cpr/parameters.h>
 #include "../utils/encoding.h"
+#include "../utils/request.h"
 
 namespace mirai
 {
+    std::string get_version()
+    {
+        const auto res = utils::get("/about", cpr::Parameters{});
+        utils::check_response(res);
+        return res["data"]["version"].get<std::string>();
+    }
+
     void error_logger()
     {
         try { throw; }

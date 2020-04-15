@@ -4,6 +4,31 @@
 
 namespace mirai
 {
+    std::vector<std::string> Session::send_image_message(
+        const utils::OptionalParam<int64_t> qq,
+        const utils::OptionalParam<int64_t> group,
+        const utils::ArrayProxy<std::string> urls) const
+    {
+        utils::json json{
+            { "sessionKey", key_ },
+            { "urls", std::vector(urls.begin(), urls.end()) }
+        };
+        if (qq) json["qq"] = *qq;
+        if (group) json["group"] = *group;
+        const auto res = utils::post_json("/sendImageMessage", json);
+        return res.get<std::vector<std::string>>();
+    }
+
+    std::vector<Event> Session::get_events(const std::string_view url, const size_t count) const
+    {
+        const utils::json res = utils::get(url, {
+            { "sessionKey", key_ },
+            { "count", std::to_string(count) }
+        });
+        utils::check_response(res);
+        return res["data"].get<std::vector<Event>>();
+    }
+
     Session::Session(const std::string_view auth_key, const int64_t qq)
     {
         // Authorize
@@ -77,6 +102,27 @@ namespace mirai
         return send_friend_message(target, Message(msg), quote);
     }
 
+    int32_t Session::send_temp_message(const int64_t qq, const int64_t group,
+        const Message& msg, const utils::OptionalParam<int32_t> quote) const
+    {
+        utils::json json{
+            { "sessionKey", key_ },
+            { "qq", qq },
+            { "group", group },
+            { "messageChain", msg }
+        };
+        if (quote.has_value()) json["quote"] = *quote;
+        const auto res = utils::post_json("/sendTempMessage", json);
+        utils::check_response(res);
+        return res["messageId"].get<int32_t>();
+    }
+
+    int32_t Session::send_temp_message(const int64_t qq, const int64_t group,
+        const std::string_view msg, const utils::OptionalParam<int32_t> quote) const
+    {
+        return send_temp_message(qq, group, Message(msg), quote);
+    }
+
     int32_t Session::send_group_message(const int64_t target,
         const Message& msg, const utils::OptionalParam<int32_t> quote) const
     {
@@ -97,29 +143,22 @@ namespace mirai
         return send_group_message(target, Message(msg), quote);
     }
 
-    std::vector<std::string> Session::send_image_message(
-        const int64_t target, const TargetType type, const utils::ArrayProxy<std::string> urls) const
-    {
-        const utils::json json{
-            { "sessionKey", key_ },
-            { "target", target },
-            { type, target },
-            { "urls", std::vector(urls.begin(), urls.end()) }
-        };
-        const auto res = utils::post_json("/sendImageMessage", json);
-        return res.get<std::vector<std::string>>();
-    }
-
     std::vector<std::string> Session::send_friend_image_message(
         const int64_t target, const utils::ArrayProxy<std::string> urls) const
     {
-        return send_image_message(target, TargetType::friend_, urls);
+        return send_image_message(target, {}, urls);
     }
 
     std::vector<std::string> Session::send_group_image_message(
         const int64_t target, const utils::ArrayProxy<std::string> urls) const
     {
-        return send_image_message(target, TargetType::group, urls);
+        return send_image_message({}, target, urls);
+    }
+
+    std::vector<std::string> Session::send_temp_image_message(const int64_t qq, const int64_t group,
+        const utils::ArrayProxy<std::string> urls) const
+    {
+        return send_image_message(qq, group, urls);
     }
 
     msg::Image Session::upload_image(const TargetType type, const std::string& path) const
@@ -148,12 +187,30 @@ namespace mirai
 
     std::vector<Event> Session::fetch_events(const size_t count) const
     {
-        const utils::json res = utils::get("/fetchMessage", {
-            { "sessionKey", key_ },
-            { "count", std::to_string(count) }
-        });
+        return get_events("/fetchMessage", count);
+    }
+
+    std::vector<Event> Session::fetch_latest_events(const size_t count) const
+    {
+        return get_events("/fetchLatestMessage", count);
+    }
+
+    std::vector<Event> Session::peek_events(const size_t count) const
+    {
+        return get_events("/peekMessage", count);
+    }
+
+    std::vector<Event> Session::peek_latest_events(const size_t count) const
+    {
+        return get_events("/peekLatestMessage", count);
+    }
+
+    size_t Session::count_events() const
+    {
+        const utils::json res = utils::get("/countMessage",
+            { { "sessionKey", key_ } });
         utils::check_response(res);
-        return res["data"].get<std::vector<Event>>();
+        return res["data"].get<size_t>();
     }
 
     Event Session::message_from_id(const int32_t id) const
