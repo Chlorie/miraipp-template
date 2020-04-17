@@ -324,6 +324,24 @@ namespace mirai
         void kick(int64_t group, int64_t member, std::string_view message = "") const;
 
         /**
+         * \brief Respond to a new friend request event
+         * \param event The event to respond to
+         * \param type Type of the response
+         * \param message The additional message
+         */
+        void respond_new_friend_request(const NewFriendRequestEvent& event,
+            NewFriendResponseType type, std::string_view message) const;
+
+        /**
+         * \brief Respond to a member join request event
+         * \param event The event to respond to
+         * \param type Type of the response
+         * \param message The additional message
+         */
+        void respond_member_join_request(const MemberJoinRequestEvent& event,
+            MemberJoinResponseType type, std::string_view message) const;
+
+        /**
          * \brief Set a group's config
          * \param target The group ID
          * \param config The config to set

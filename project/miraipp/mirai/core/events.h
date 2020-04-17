@@ -24,7 +24,16 @@ namespace mirai
     struct FriendMessage final
     {
         ReceivedMessage message; ///< The messgae
-        Friend sender;
+        Friend sender; ///< Sender of the message
+    };
+
+    /**
+     * \brief Event for receiving a temporary message
+     */
+    struct TempMessage final
+    {
+        ReceivedMessage message; ///< The messgae
+        Member sender; ///< Sender of the message
     };
 
     /**
@@ -267,8 +276,49 @@ namespace mirai
         std::optional<Member> operator_; ///< The operator who unmuted the group member, null if it's the bot
     };
 
+    /**
+     * \brief Event received when someone requested to add friend
+     */
+    struct NewFriendRequestEvent final
+    {
+        int64_t event_id = 0; ///< The identifier of the event for future respond
+        int64_t from_id = 0; ///< QQ of the user who started this request
+        std::optional<int64_t> group_id; ///< If the request is started from a group then this is the group id
+        std::string nick; ///< The nickname or group card
+    };
+
+    /**
+     * \brief Response type for new friend request event
+     */
+    enum class NewFriendResponseType
+    {
+        approve, disapprove, blacklist
+    };
+
+    /**
+     * \brief Event received when someone requested to join a group
+     */
+    struct MemberJoinRequestEvent final
+    {
+        int64_t event_id = 0; ///< The identifier of the event for future respond
+        int64_t from_id = 0; ///< QQ of the user who started this request
+        int64_t group_id; ///< The group ID
+        std::string group_name; ///< Name of the group
+        std::string nick; ///< The nickname
+    };
+
+    /**
+     * \brief Response type for member join request event
+     */
+    enum class MemberJoinResponseType
+    {
+        approve, disapprove, ignore,
+        disapprove_blacklist, ignore_blacklist
+    };
+
     void from_json(const utils::json& json, GroupMessage& value);
     void from_json(const utils::json& json, FriendMessage& value);
+    void from_json(const utils::json& json, TempMessage& value);
     void from_json(const utils::json& json, BotOnlineEvent& value);
     void from_json(const utils::json& json, BotOfflineEventActive& value);
     void from_json(const utils::json& json, BotOfflineEventForce& value);
@@ -294,16 +344,19 @@ namespace mirai
     void from_json(const utils::json& json, MemberPermissionChangeEvent& value);
     void from_json(const utils::json& json, MemberMuteEvent& value);
     void from_json(const utils::json& json, MemberUnmuteEvent& value);
+    void from_json(const utils::json& json, NewFriendRequestEvent& value);
+    void from_json(const utils::json& json, MemberJoinRequestEvent& value);
 
     using EventVariant = std::variant<
-        GroupMessage, FriendMessage,
+        GroupMessage, FriendMessage, TempMessage,
         BotOnlineEvent, BotOfflineEventActive, BotOfflineEventForce, BotOfflineEventDropped,
         BotReloginEvent, GroupRecallEvent, FriendRecallEvent, BotGroupPermissionChangeEvent,
         BotMuteEvent, BotUnmuteEvent, BotJoinGroupEvent, GroupNameChangeEvent,
         GroupEntranceAnnouncementChangeEvent, GroupMuteAllEvent, GroupAllowAnonymousChatEvent,
         GroupAllowConfessTalkEvent, GroupAllowMemberInviteEvent, MemberJoinEvent,
         MemberLeaveEventKick, MemberLeaveEventQuit, MemberCardChangeEvent,
-        MemberSpecialTitleChangeEvent, MemberPermissionChangeEvent, MemberMuteEvent, MemberUnmuteEvent
+        MemberSpecialTitleChangeEvent, MemberPermissionChangeEvent, MemberMuteEvent, MemberUnmuteEvent,
+        NewFriendRequestEvent, MemberJoinRequestEvent
     >;
 
     /**
@@ -311,7 +364,7 @@ namespace mirai
      */
     enum class EventType
     {
-        group_message, friend_message,
+        group_message, friend_message, temp_message,
         bot_online_event, bot_offline_event_active, bot_offline_event_force, bot_offline_event_dropped,
         bot_relogin_event, group_recall_event, friend_recall_event, bot_group_permission_change_event,
         bot_mute_event, bot_unmute_event, bot_join_group_event, group_name_change_event,
@@ -319,7 +372,7 @@ namespace mirai
         group_allow_confess_talk_event, group_allow_member_invite_event, member_join_event,
         member_leave_event_kick, member_leave_event_quit, member_card_change_event,
         member_special_title_change_event, member_permission_change_event, member_mute_event,
-        member_unmute_event
+        member_unmute_event, new_friend_request_event, member_join_request_event
     };
 
     /**

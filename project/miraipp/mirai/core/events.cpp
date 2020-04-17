@@ -1,5 +1,7 @@
 #include "events.h"
 
+#include <iostream>
+
 namespace mirai
 {
     void from_json(const utils::json& json, GroupMessage& value)
@@ -9,6 +11,12 @@ namespace mirai
     }
 
     void from_json(const utils::json& json, FriendMessage& value)
+    {
+        json["messageChain"].get_to(value.message);
+        json["sender"].get_to(value.sender);
+    }
+
+    void from_json(const utils::json& json, TempMessage& value)
     {
         json["messageChain"].get_to(value.message);
         json["sender"].get_to(value.sender);
@@ -178,11 +186,29 @@ namespace mirai
         json["operator"].get_to(value.operator_);
     }
 
+    void from_json(const utils::json& json, NewFriendRequestEvent& value)
+    {
+        json["eventId"].get_to(value.event_id);
+        json["fromId"].get_to(value.from_id);
+        const int64_t group_id = json["groupId"].get<int64_t>();
+        if (group_id != 0) value.group_id = group_id;
+        json["nick"].get_to(value.nick);
+    }
+
+    void from_json(const utils::json& json, MemberJoinRequestEvent& value)
+    {
+        json["eventId"].get_to(value.event_id);
+        json["fromId"].get_to(value.from_id);
+        json["groupId"].get_to(value.group_id);
+        json["nick"].get_to(value.nick);
+        json["groupName"].get_to(value.group_name);
+    }
+
     namespace
     {
         constexpr std::array<std::string_view, std::variant_size_v<EventVariant>> event_types
         {
-            "GroupMessage", "FriendMessage",
+            "GroupMessage", "FriendMessage", "TempMessage",
             "BotOnlineEvent", "BotOfflineEventActive", "BotOfflineEventForce", "BotOfflineEventDropped",
             "BotReloginEvent", "GroupRecallEvent", "FriendRecallEvent", "BotGroupPermissionChangeEvent",
             "BotMuteEvent", "BotUnmuteEvent", "BotJoinGroupEvent", "GroupNameChangeEvent",
@@ -190,7 +216,7 @@ namespace mirai
             "GroupAllowConfessTalkEvent", "GroupAllowMemberInviteEvent", "MemberJoinEvent",
             "MemberLeaveEventKick", "MemberLeaveEventQuit", "MemberCardChangeEvent",
             "MemberSpecialTitleChangeEvent", "MemberPermissionChangeEvent", "MemberMuteEvent",
-            "MemberUnmuteEvent"
+            "MemberUnmuteEvent", "NewFriendRequestEvent", "MemberJoinRequestEvent"
         };
 
         template <size_t... I>

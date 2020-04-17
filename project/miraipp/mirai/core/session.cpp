@@ -299,6 +299,34 @@ namespace mirai
         utils::check_response(res);
     }
 
+    void Session::respond_new_friend_request(const NewFriendRequestEvent& event,
+        const NewFriendResponseType type, const std::string_view message) const
+    {
+        const utils::json res = utils::post_json("/resp/newFriendRequestEvent", {
+            { "sessionKey", key_ },
+            { "eventId", event.event_id },
+            { "fromId", event.from_id },
+            { "groupId", event.group_id.value_or(0) },
+            { "operate", int32_t(type) },
+            { "message", message }
+        });
+        utils::check_response(res);
+    }
+
+    void Session::respond_member_join_request(const MemberJoinRequestEvent& event,
+        const MemberJoinResponseType type, const std::string_view message) const
+    {
+        const utils::json res = utils::post_json("/resp/memberJoinRequestEvent", {
+            { "sessionKey", key_ },
+            { "eventId", event.event_id },
+            { "fromId", event.from_id },
+            { "groupId", event.group_id },
+            { "operate", int32_t(type) },
+            { "message", message }
+        });
+        utils::check_response(res);
+    }
+
     void Session::group_config(int64_t target, const GroupConfig& config) const
     {
         const utils::json res = utils::post_json("/groupConfig", {
