@@ -22,10 +22,13 @@ namespace mirai::ws
         client_.stop_perpetual();
         for (const auto& connection : connections_)
         {
-            try { close(*connection); }
+            try
+            {
+                if (!connection->ended())
+                    close(*connection);
+            }
             catch (...) {}
         }
-
     }
 
     Connection& Client::connect(const std::string& uri)

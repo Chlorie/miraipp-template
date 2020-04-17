@@ -37,6 +37,6 @@ namespace mirai::utils
     {
         const auto iter = json.find("code");
         if (iter != json.end() && iter->get<int32_t>() != 0)
-            throw RuntimeError(json["msg"].get_ref<const std::string&>());
+            throw RuntimeError(json.at("msg").get_ref<const std::string&>());
     }
 }

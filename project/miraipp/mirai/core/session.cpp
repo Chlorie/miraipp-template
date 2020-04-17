@@ -26,7 +26,7 @@ namespace mirai
             { "count", std::to_string(count) }
         });
         utils::check_response(res);
-        return res["data"].get<std::vector<Event>>();
+        return res.at("data").get<std::vector<Event>>();
     }
 
     Session::Session(const std::string_view auth_key, const int64_t qq)
@@ -37,7 +37,7 @@ namespace mirai
                 { "authKey", std::string(auth_key) }
             });
             utils::check_response(res);
-            res["session"].get_to(key_);
+            res.at("session").get_to(key_);
         }
         // Verify
         {
@@ -93,7 +93,7 @@ namespace mirai
         if (quote.has_value()) json["quote"] = *quote;
         const auto res = utils::post_json("/sendFriendMessage", json);
         utils::check_response(res);
-        return res["messageId"].get<int32_t>();
+        return res.at("messageId").get<int32_t>();
     }
 
     int32_t Session::send_friend_message(const int64_t target,
@@ -114,7 +114,7 @@ namespace mirai
         if (quote.has_value()) json["quote"] = *quote;
         const auto res = utils::post_json("/sendTempMessage", json);
         utils::check_response(res);
-        return res["messageId"].get<int32_t>();
+        return res.at("messageId").get<int32_t>();
     }
 
     int32_t Session::send_temp_message(const int64_t qq, const int64_t group,
@@ -134,7 +134,7 @@ namespace mirai
         if (quote.has_value()) json["quote"] = *quote;
         const auto res = utils::post_json("/sendGroupMessage", json);
         utils::check_response(res);
-        return res["messageId"].get<int32_t>();
+        return res.at("messageId").get<int32_t>();
     }
 
     int32_t Session::send_group_message(const int64_t target,
@@ -210,7 +210,7 @@ namespace mirai
         const utils::json res = utils::get("/countMessage",
             { { "sessionKey", key_ } });
         utils::check_response(res);
-        return res["data"].get<size_t>();
+        return res.at("data").get<size_t>();
     }
 
     Event Session::message_from_id(const int32_t id) const
@@ -220,7 +220,7 @@ namespace mirai
             { "id", std::to_string(id) }
         });
         utils::check_response(res);
-        return res["data"].get<Event>();
+        return res.at("data").get<Event>();
     }
 
     std::vector<Friend> Session::friend_list() const

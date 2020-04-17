@@ -10,7 +10,7 @@ namespace mirai
     {
         const auto res = utils::get("/about", cpr::Parameters{});
         utils::check_response(res);
-        return res["data"]["version"].get<std::string>();
+        return res.at("data").at("version").get<std::string>();
     }
 
     void error_logger()

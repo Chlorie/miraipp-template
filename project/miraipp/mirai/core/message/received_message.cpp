@@ -7,9 +7,9 @@ namespace mirai
         MessageChain chain;
         for (auto& node : json)
         {
-            if (node["type"] == "Source")
+            if (node.at("type") == "Source")
                 value.source = node.get<msg::Source>();
-            else if (node["type"] == "Quote")
+            else if (node.at("type") == "Quote")
                 value.quote = node.get<msg::Quote>();
             else
                 chain.emplace_back(node.get<Segment>());
