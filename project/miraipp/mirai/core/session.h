@@ -26,6 +26,7 @@ namespace mirai
         int64_t qq_ = 0;
         std::string key_;
         std::unique_ptr<ws::Client> client_;
+        std::unique_ptr<asio::thread_pool> thread_pool_;
 
         std::vector<std::string> send_image_message(utils::OptionalParam<int64_t> qq,
             utils::OptionalParam<int64_t> group,
@@ -35,7 +36,7 @@ namespace mirai
 
         template <typename F, typename E>
         ws::Connection& subscribe(std::string_view url,
-            F&& callback, E&& error_handler);
+            F&& callback, E&& error_handler, ExecutionPolicy policy);
     public:
         /**
          * \brief Construct a default invalid Session object
@@ -108,6 +109,24 @@ namespace mirai
          * \return The key
          */
         std::string_view key() const { return key_; }
+
+        /**
+         * \brief Query whether the thread pool is started
+         * \return The result
+         */
+        bool thread_pool_started() const { return thread_pool_ != nullptr; }
+
+        /**
+         * \brief Start the thread pool for future event processing
+         * \param thread_count Thread count, leave as default for the default value
+         * \remarks This function does nothing if the thread pool is already running
+         */
+        void start_thread_pool(utils::OptionalParam<size_t> thread_count = {});
+
+        /**
+         * \brief Join all threads in the thread pool and destroy the pool
+         */
+        void destroy_thread_pool();
 
         /**
          * \brief Query whether the websocket client is started
@@ -213,7 +232,7 @@ namespace mirai
 
         /**
          * \brief Upload an image to the server
-         * \param type Target type (friend or group)
+         * \param type Target type (friend, group or temp)
          * \param path The path to the image file
          * \return The image ID and other info about the image
          * \remark Image IDs of the same image are different for
@@ -372,11 +391,6 @@ namespace mirai
         MemberInfo member_info(int64_t group, int64_t member) const;
 
         /**
-         * \brief Start up the websocket client on another thread
-         */
-        void start_websocket_client();
-
-        /**
          * \brief Close the websocket client, outstanding connections will
          * also be closed
          */
@@ -394,6 +408,7 @@ namespace mirai
          * \tparam E Type of the error handler
          * \param callback The callback
          * \param error_handler The error handler
+         * \param policy Execution policy of this connection
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
          * both of the message types. The events will be handled on
@@ -403,7 +418,8 @@ namespace mirai
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
             typename = std::invoke_result_t<E>>
-        ws::Connection& subscribe_messages(F&& callback, E&& error_handler = error_rethrower);
+        ws::Connection& subscribe_messages(F&& callback, E&& error_handler,
+            ExecutionPolicy policy = ExecutionPolicy::single_thread);
 
         /**
          * \brief Listen on non-message events received using the callback
@@ -411,6 +427,7 @@ namespace mirai
          * \tparam E Type of the error handler
          * \param callback The callback
          * \param error_handler The error handler
+         * \param policy Execution policy of this connection
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
          * all of the non-message event types. The events will be
@@ -420,7 +437,8 @@ namespace mirai
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
             typename = std::invoke_result_t<E>>
-        ws::Connection& subscribe_non_message(F&& callback, E&& error_handler = error_rethrower);
+        ws::Connection& subscribe_non_message(F&& callback, E&& error_handler,
+            ExecutionPolicy policy = ExecutionPolicy::single_thread);
 
         /**
          * \brief Listen on all events received using the callback
@@ -428,6 +446,7 @@ namespace mirai
          * \tparam E Type of the error handler
          * \param callback The callback
          * \param error_handler The error handler
+         * \param policy Execution policy of this connection
          * \returns The Websocket connection
          * \remarks The callback should be able to visit variants with
          * all of the event types. The events will be handled on another
@@ -437,7 +456,8 @@ namespace mirai
         template <typename F, typename E,
             typename = std::invoke_result_t<F, Event&>,
             typename = std::invoke_result_t<E>>
-        ws::Connection& subscribe_all_events(F&& callback, E&& error_handler = error_rethrower);
+        ws::Connection& subscribe_all_events(F&& callback, E&& error_handler,
+            ExecutionPolicy policy = ExecutionPolicy::single_thread);
 
         /**
          * \brief Set the config of this session, leave parameters as default for
@@ -457,44 +477,78 @@ namespace mirai
 
     template <typename F, typename E>
     ws::Connection& Session::subscribe(const std::string_view url,
-        F&& callback, E&& error_handler)
+        F&& callback, E&& error_handler, const ExecutionPolicy policy)
     {
-        if (!client_) throw RuntimeError("Websocket client isn't started");
+        using MsgPtr = ws::AsioClient::message_ptr;
+        if (!client_) client_ = std::make_unique<ws::Client>();
         const std::string uri = utils::strcat("ws://", base_url, url, "?sessionKey=", key_);
         ws::Connection& con = client_->connect(uri);
-        con.message_callback([callback = std::forward<F>(callback),
-                error_handler = std::forward<E>(error_handler)](const std::string& msg)
-            {
-                try
+        if (policy == ExecutionPolicy::single_thread)
+        {
+            con.message_callback([callback = std::forward<F>(callback),
+                    error_handler = std::forward<E>(error_handler)](const MsgPtr& msg)
                 {
-                    const utils::json json = utils::json::parse(msg);
-                    utils::check_response(json);
-                    Event e = json.get<Event>();
-                    callback(e);
-                }
-                catch (...) { error_handler(); }
-            });
+                    try
+                    {
+                        const utils::json json = utils::json::parse(msg->get_payload());
+                        utils::check_response(json);
+                        Event e = json.get<Event>();
+                        callback(e);
+                    }
+                    catch (...) { error_handler(); }
+                });
+        }
+        else
+        {
+            if (!thread_pool_) start_thread_pool();
+            // Wrap everything into shared_ptrs to avoid lifetime issues
+            con.message_callback([
+                    &pool = *thread_pool_,
+                    callback = std::make_shared<std::decay_t<F>>(std::forward<F>(callback)),
+                    error_handler = std::make_shared<std::decay_t<E>>(std::forward<E>(error_handler))
+                ](const MsgPtr& msg)
+                {
+                    try
+                    {
+                        asio::post(pool, [=]() // Copy the shared_ptrs to make them alive
+                        {
+                            try
+                            {
+                                const utils::json json = utils::json::parse(msg->get_payload());
+                                utils::check_response(json);
+                                Event e = json.get<Event>();
+                                (*callback)(e);
+                            }
+                            catch (...) { (*error_handler)(); }
+                        });
+                    }
+                    catch (...) { (*error_handler)(); }
+                });
+        }
         return con;
     }
 
     template <typename F, typename E, typename, typename>
-    ws::Connection& Session::subscribe_messages(F&& callback, E&& error_handler)
+    ws::Connection& Session::subscribe_messages(F&& callback, E&& error_handler,
+        const ExecutionPolicy policy)
     {
         return subscribe("/message",
-            std::forward<F>(callback), std::forward<E>(error_handler));
+            std::forward<F>(callback), std::forward<E>(error_handler), policy);
     }
 
     template <typename F, typename E, typename, typename>
-    ws::Connection& Session::subscribe_non_message(F&& callback, E&& error_handler)
+    ws::Connection& Session::subscribe_non_message(F&& callback, E&& error_handler,
+        const ExecutionPolicy policy)
     {
         return subscribe("/event",
-            std::forward<F>(callback), std::forward<E>(error_handler));
+            std::forward<F>(callback), std::forward<E>(error_handler), policy);
     }
 
     template <typename F, typename E, typename, typename>
-    ws::Connection& Session::subscribe_all_events(F&& callback, E&& error_handler)
+    ws::Connection& Session::subscribe_all_events(F&& callback, E&& error_handler,
+        const ExecutionPolicy policy)
     {
         return subscribe("/all",
-            std::forward<F>(callback), std::forward<E>(error_handler));
+            std::forward<F>(callback), std::forward<E>(error_handler), policy);
     }
 }

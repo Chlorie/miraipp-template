@@ -36,7 +36,7 @@ namespace mirai::ws
         std::error_code error_{};
         std::string uri_;
         std::string server_ = "N/A";
-        std::function<void(const std::string&)> message_callback_{};
+        std::function<void(const AsioClient::message_ptr&)> message_callback_{};
     public:
         /**
          * \brief Construct a connection object using a handle and an URI
@@ -145,7 +145,7 @@ namespace mirai::ws
          * \brief Set the message callback of this connection
          * \param callback The callback to set
          */
-        void message_callback(std::function<void(const std::string&)> callback);
+        void message_callback(std::function<void(const AsioClient::message_ptr&)> callback);
 
         /**
          * \brief Get the message callback of this connection

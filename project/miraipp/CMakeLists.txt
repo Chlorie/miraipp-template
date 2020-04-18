@@ -4,8 +4,7 @@ set(SOURCE_FILES
     "mirai/core/session.cpp" "mirai/core/common.cpp"
     "mirai/core/events.cpp" "mirai/core/types.cpp"
     "mirai/core/message/message.cpp" "mirai/core/message/segment.cpp" 
-     "mirai/core/message/common.cpp" 
-    "mirai/core/message/received_message.cpp"
+    "mirai/core/message/common.cpp" "mirai/core/message/received_message.cpp"
     "mirai/core/websockets/client.cpp" "mirai/core/websockets/connection.cpp"
     "mirai/utils/thread.cpp" "mirai/utils/encoding.cpp" "mirai/utils/request.cpp" 
 ) 

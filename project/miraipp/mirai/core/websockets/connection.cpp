@@ -43,10 +43,10 @@ namespace mirai::ws
     void Connection::on_message(Handle, const AsioClient::message_ptr message) const
     {
         if (!message_callback_) return;
-        message_callback_(message->get_payload());
+        message_callback_(message);
     }
 
-    void Connection::message_callback(std::function<void(const std::string&)> callback)
+    void Connection::message_callback(std::function<void(const AsioClient::message_ptr&)> callback)
     {
         message_callback_ = std::move(callback);
     }

@@ -5,13 +5,19 @@
 namespace mirai
 {
     /**
+     * \brief Execution policy of event processing
+     */
+    enum class ExecutionPolicy { single_thread, thread_pool };
+
+    /**
      * \brief Whether the target is friend or group
      */
-    enum class TargetType : bool { friend_, group };
+    enum class TargetType : bool { friend_, group, temp };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(TargetType, {
         { TargetType::friend_, "friend" },
-        { TargetType::group, "group" }
+        { TargetType::group, "group" },
+        { TargetType::temp, "temp" }
         });
 
     /**

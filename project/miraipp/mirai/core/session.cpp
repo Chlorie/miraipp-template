@@ -55,6 +55,7 @@ namespace mirai
         if (qq_ == 0) return; // Invalid session
         try
         {
+            destroy_thread_pool();
             utils::post_json("/release", {
                 { "sessionKey", key_ },
                 { "qq", qq_ }
@@ -66,7 +67,8 @@ namespace mirai
     Session::Session(Session&& other) noexcept :
         qq_(std::exchange(other.qq_, 0)),
         key_(std::move(other.key_)),
-        client_(std::move(other.client_)) {}
+        client_(std::move(other.client_)),
+        thread_pool_(std::move(other.thread_pool_)) {}
 
     Session& Session::operator=(Session&& other) noexcept
     {
@@ -80,6 +82,25 @@ namespace mirai
         std::swap(qq_, other.qq_);
         std::swap(key_, other.key_);
         std::swap(client_, other.client_);
+        std::swap(thread_pool_, other.thread_pool_);
+    }
+
+    void Session::start_thread_pool(const utils::OptionalParam<size_t> thread_count)
+    {
+        if (!thread_pool_)
+        {
+            if (thread_count)
+                thread_pool_ = std::make_unique<asio::thread_pool>(*thread_count);
+            else
+                thread_pool_ = std::make_unique<asio::thread_pool>();
+        }
+    }
+
+    void Session::destroy_thread_pool()
+    {
+        if (thread_pool_)
+            thread_pool_->join();
+        thread_pool_.reset();
     }
 
     int32_t Session::send_friend_message(const int64_t target,
@@ -163,11 +184,12 @@ namespace mirai
 
     msg::Image Session::upload_image(const TargetType type, const std::string& path) const
     {
+        static constexpr std::array type_names{ "friend", "group", "temp" };
         const cpr::Response response = Post(
             cpr::Url{ std::string(base_url) += "/uploadImage" },
             cpr::Multipart{
                 { "sessionKey", key_ },
-                { "type", type == TargetType::friend_ ? "friend" : "group" },
+                { "type", type_names[size_t(type)] },
                 { "img", cpr::File(path) }
             });
         if (response.status_code != 200) // Status code not OK
@@ -366,12 +388,6 @@ namespace mirai
             { "memberId", std::to_string(member) },
         });
         return res.get<MemberInfo>();
-    }
-
-    void Session::start_websocket_client()
-    {
-        if (!websocket_client_started())
-            client_ = std::make_unique<ws::Client>();
     }
 
     void Session::close_websocket_client()
