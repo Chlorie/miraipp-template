@@ -1,0 +1,3 @@
+[submodule "project/miraipp"]
+	path = project/miraipp
+	url = https://github.com/Chlorie/mirai-library.git
