@@ -17,7 +17,7 @@
 - [JSON for Modern C++](https://github.com/nlohmann/json): 很易用的 C++ json 库。
 
 ## 文档
-若需要一个如何起步的简短教程，请看[这里](https://github.com/Chlorie/miraipp/wiki/Examples)。
+若需要一个如何起步的简短教程，请看[这里](https://github.com/Chlorie/miraipp-template/wiki/Examples)。
 
 本项目采用 Doxygen 注释格式写明 API 函数的使用方法，你可以用 Doxygen 来生成 pdf/html 格式的文档，或者如果你的 IDE 比较好的话，
 在自动补全提示里面应该就会显示对应函数的文档。因为我尽量在维持代码全都是 ASCII 字符（防止出现编码问题，因为是 C++ 所以都懂……），
