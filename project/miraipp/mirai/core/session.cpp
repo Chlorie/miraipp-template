@@ -369,14 +369,17 @@ namespace mirai
     }
 
     void Session::member_info(const int64_t group, const int64_t member,
-        const MemberInfo& info) const
+        const utils::OptionalParam<std::string_view> name,
+        const utils::OptionalParam<std::string_view> special_title) const
     {
-        const utils::json res = utils::post_json("/memberInfo", {
+        utils::json res = utils::post_json("/memberInfo", {
             { "sessionKey", key_ },
             { "target", group },
             { "memberId", member },
-            { "info", info }
+            { "info", {} }
         });
+        if (name) res["info"]["name"] = *name;
+        if (special_title) res["info"]["specialTitle"] = *special_title;
         utils::check_response(res);
     }
 

@@ -59,8 +59,8 @@ namespace mirai::utils
          * \tparam T Type of the object
          * \param object The object
          */
-        template <typename T, typename =
-            std::enable_if_t<detail::in_variant_v<VariantType, std::decay_t<T>>>>
+        template <typename T,
+            std::enable_if_t<detail::in_variant_v<VariantType, std::decay_t<T>>>* = nullptr>
         VariantWrapper(T&& object): data_(std::forward<T>(object)) {}
 
         /**

@@ -33,7 +33,7 @@ namespace mirai::utils
          * \param f The callable object
          * \param args The bound arguments
          */
-        template <typename F, typename... Ts, typename = std::enable_if_t<not_thread_v<F>>>
+        template <typename F, typename... Ts, std::enable_if_t<not_thread_v<F>>* = nullptr>
         explicit Thread(F&& f, Ts&&... args) : thread_(std::forward<F>(f), std::forward<Ts>(args)...) {}
 
         /**

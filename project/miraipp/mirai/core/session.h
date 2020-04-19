@@ -365,7 +365,7 @@ namespace mirai
          * \param target The group ID
          * \param config The config to set
          */
-        void group_config(int64_t target, const GroupConfig& config) const; // TODO: optional fields
+        void group_config(int64_t target, const GroupConfig& config) const;
 
         /**
          * \brief Get a group's config
@@ -378,9 +378,12 @@ namespace mirai
          * \brief Modify a group member's info
          * \param group The group ID
          * \param member The member ID
-         * \param info The member info to modify to
+         * \param name The new name for the member
+         * \param special_title The new special title for the member
          */
-        void member_info(int64_t group, int64_t member, const MemberInfo& info) const; // TODO: optional fields
+        void member_info(int64_t group, int64_t member,
+            utils::OptionalParam<std::string_view> name,
+            utils::OptionalParam<std::string_view> special_title) const;
 
         /**
          * \brief Get a group member's info

@@ -64,15 +64,17 @@ namespace mirai
 
     /**
      * \brief Group configuration
+     * \remarks The optionals are for configuring, the results will always
+     * have values
      */
     struct GroupConfig final
     {
-        std::string name; ///< The group name
-        std::string announcement; ///< The group entrance announcement
-        bool confess_talk = false; ///< Whether to enable confess talk
-        bool allow_member_invite = false; ///< Whether to allow inviting other people
-        bool auto_approve = false; ///< Whether to approve join requests automatically
-        bool anonymous_chat = false; ///< Whether to enable anonymous chat
+        std::optional<std::string> name; ///< The group name
+        std::optional<std::string> announcement; ///< The group entrance announcement
+        std::optional<bool> confess_talk = false; ///< Whether to enable confess talk
+        std::optional<bool> allow_member_invite = false; ///< Whether to allow inviting other people
+        std::optional<bool> auto_approve = false; ///< Whether to approve join requests automatically
+        std::optional<bool> anonymous_chat = false; ///< Whether to enable anonymous chat
     };
 
     /**
