@@ -1,5 +1,9 @@
 # Mirai++
 
+![](https://github.com/Chlorie/miraipp-template/workflows/Build%20Status/badge.svg)
+
+[中文版](README.md)
+
 ## Overview
 Mirai QQ bot C++ CMake template project. Based on the [HTTP API](https://github.com/mamoe/mirai-api-http) instead of mirai-native.
 

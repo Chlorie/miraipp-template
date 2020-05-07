@@ -1,5 +1,7 @@
 # Mirai++
 
+![](https://github.com/Chlorie/miraipp-template/workflows/Build%20Status/badge.svg)
+
 [English Version](README-en.md)
 
 ## 总览
