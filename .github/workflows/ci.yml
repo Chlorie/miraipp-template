@@ -1,0 +1,55 @@
+name: Build Status
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: build-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            triplet: x64-linux
+            vcpkgPackages: 'cpr websocketpp asio libiconv nlohmann-json'
+            vcpkgCommitId: 'c7ab9d3110813979a873b2dbac630a9ab79850dc'
+          - os: windows-latest
+            triplet: x64-windows
+            vcpkgPackages: 'cpr websocketpp asio libiconv nlohmann-json'
+            vcpkgCommitId: 'c7ab9d3110813979a873b2dbac630a9ab79850dc'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodule: true
+      - uses: lukka/get-cmake@latest
+      - name: Find Directory
+        run: find ${{ runner.workspace }}
+        if: "!contains( matrix.os, 'windows')"
+      - name: Find Directory
+        run: gci -recurse ${{ runner.workspace }}
+        if: contains( matrix.os, 'windows')
+      - name: Run vcpkg
+        uses: lukka/run-vcpkg@master
+        id: runvcpkg
+        with:
+          vcpkgArguments: '${{ matrix.vcpkgPackages }}'
+          vcpkgTriplet: '${{ matrix.triplet }}'
+          vcpkgDirectory: '${{ runner.workspace }}/b/vcpkg'
+          vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
+      - name: Prints outputs of run-vcpkg task
+        run: echo "'${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}' '${{  steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}' "
+      - name: Run CMake+Ninja with triplet
+        uses: lukka/run-cmake@v2
+        id: runcmake
+        with:
+          cmakeGenerator: 'Ninja'
+          useVcpkgToolchainFile: true
+          buildWithCMakeArgs: '-- -v'
+          vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
+          buildDirectory: '${{ runner.workspace }}/b/ninja/'
