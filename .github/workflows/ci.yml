@@ -19,10 +19,17 @@ jobs:
             triplet: x64-linux
             vcpkgPackages: 'cpr websocketpp asio libiconv nlohmann-json'
             vcpkgCommitId: 'c7ab9d3110813979a873b2dbac630a9ab79850dc'
+            cc: gcc-9
+            cxx: g++-9
           - os: windows-latest
             triplet: x64-windows
             vcpkgPackages: 'cpr websocketpp asio libiconv nlohmann-json'
             vcpkgCommitId: 'c7ab9d3110813979a873b2dbac630a9ab79850dc'
+            cc: cl
+            cxx: cl
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
     steps:
       - uses: actions/checkout@v2
         with:
