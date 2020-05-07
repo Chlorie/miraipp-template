@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodule: true
+          submodules: true
       - uses: lukka/get-cmake@latest
       - name: Find Directory
         run: find ${{ runner.workspace }}
