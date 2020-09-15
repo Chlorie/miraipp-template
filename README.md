@@ -4,6 +4,9 @@
 
 [English Version](README-en.md)
 
+## 公告
+目前开发者正在咕咕，随时有可能会弃坑。本项目可能会在一段时间后完全终止，因为作者正在咕咕基于 JNI 的框架。
+
 ## 总览
 基于 Mirai 的 QQ bot C++ CMake 项目模板。本项目基于 Mirai 的 [HTTP API](https://github.com/mamoe/mirai-api-http)，而非 mirai-native。
 
